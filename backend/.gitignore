@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Local dev database
+*.db
