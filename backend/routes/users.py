@@ -19,14 +19,6 @@ def get_user(user_id: int):
         return error("User not found", 404)
  
     return success(
-        {
-            "success": True,
-            "user": {
-                "id": user.id,
-                "name": user.name,
-                "username": user.username,
-                "email": user.email,
-            },
-        }
+        user.serialize(), code = 200
     )
  

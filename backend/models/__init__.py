@@ -8,4 +8,8 @@ def get_utc_now():
     """Return current UTC time"""
     return datetime.now(timezone.utc)
 
-__all__ = ['db', 'datetime', 'timedelta', 'timezone', 'DateTime', 'func', 'get_utc_now']
+# Import models after db is created
+from backend.models.user import User
+from backend.models.session_token import SessionToken
+
+__all__ = ['db', 'datetime', 'timedelta', 'timezone', 'DateTime', 'func', 'get_utc_now', 'User', 'SessionToken']
