@@ -69,7 +69,7 @@ class User(Base):
 
 ### 4.1 Single module, clear responsibilities
 
-Keep token and password helpers in one place, e.g. `app/auth/tokens.py` and `app/auth/passwords.py`, *or* one file `app/auth/core.py` if the project is small—**whichever reads simpler**.
+Keep token and password helpers in one place, e.g. `app/auth/tokens.py` and `app/auth/passwords.py`, _or_ one file `app/auth/core.py` if the project is small—**whichever reads simpler**.
 
 - **Hash password:** e.g. `bcrypt` with a sensible cost parameter; verify with constant-time compare (library helpers do this).
 - **Mint JWT:** include `sub` (user id), `exp` (expiry), and optionally `iat`. Sign with `HS256` and a **long random secret** from the environment.
