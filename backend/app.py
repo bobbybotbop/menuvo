@@ -1,7 +1,7 @@
 from flask import Flask
 import os
 from backend.models import db
-from backend.routes import auth_bp, users_bp
+from backend.routes import users_bp
 
  
 def create_app():
@@ -24,7 +24,6 @@ def create_app():
         db.create_all()
     
     # Register blueprints
-    app.register_blueprint(auth_bp, url_prefix="/api/users")
     app.register_blueprint(users_bp, url_prefix="/api/users")
     
     return app
