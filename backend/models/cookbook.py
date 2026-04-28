@@ -1,4 +1,5 @@
-from backend.models import db, cookbookRecipes
+from backend.models.assocTables import cookbookRecipes
+from backend.models.base import db
 
 class Cookbook(db.Model):
     """
@@ -26,7 +27,6 @@ class Cookbook(db.Model):
     def __init__(self, **kwargs):        
         self.name = kwargs.get("name")
         self.description = kwargs.get("description")
-
 
     def serialize(self):
         """Full cookbook view"""

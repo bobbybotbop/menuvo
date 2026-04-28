@@ -1,4 +1,4 @@
-from backend.models import db, DateTime, get_utc_now
+from backend.models.base import db, DateTime, get_utc_now
 
 class Recipe(db.Model):
     """

@@ -1,4 +1,5 @@
-from backend.models import db, DateTime, get_utc_now
+from backend.models.base import db, DateTime, get_utc_now
+from backend.models.friendship import Friendship
 
 class User(db.Model):
     """
@@ -20,11 +21,39 @@ class User(db.Model):
     # delete tokens when user is deleted.
     tokens = db.relationship('SessionToken', cascade="all, delete-orphan", backref='user')
 
+    friendships = db.relationship(
+        'Friendship',
+        foreign_keys='Friendship.user_id',
+        backref='user_ref',
+        cascade='all, delete-orphan'
+    )
+
     def __init__(self, **kwargs):
         """Initialize a user with password_hash, name, and username."""
         self.password_hash = kwargs.get("password_hash")
         self.name = kwargs.get("name")
         self.username = kwargs.get("username")
+
+    def send_friend_request(self, friend):
+        """Send friend request"""
+        if not Friendship.query.filter_by(user_id=self.id, friend_id=friend.id).first():
+            f = Friendship(user_id=self.id, friend_id=friend.id, status='pending')
+            db.session.add(f)
+    
+    def accept_friend_request(self, friend):
+        """Accept friend request"""
+        f = Friendship.query.filter_by(user_id=friend.id, friend_id=self.id).first()
+        if f:
+            f.status = 'accepted'
+    
+    def get_friends(self):
+        """Get all accepted friends"""
+        accepted = Friendship.query.filter_by(friend_id=self.id, status='accepted').all()
+        return [f.user for f in accepted]
+    
+    def get_pending_requests(self):
+        """Get pending friend requests"""
+        return Friendship.query.filter_by(friend_id=self.id, status='pending').all()
 
     def serialize(self):
         """Serialize user to dictionary."""
@@ -34,7 +63,3 @@ class User(db.Model):
             "username": self.username,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
-
-
-
-

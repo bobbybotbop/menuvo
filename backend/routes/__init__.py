@@ -1,15 +1,9 @@
-# external libraries used by routes
-from flask import Blueprint, request, g, jsonify
-from werkzeug.security import check_password_hash, generate_password_hash
-from sqlalchemy.exc import IntegrityError
-from marshmallow import ValidationError
-
-# local libraries used by routes
-from backend.models import User, SessionToken, db
-from backend.utils import error, success, generate_token
-from backend.schemas import CreateAccountSchema, LoginSchema, AutoLoginSchema
-from backend.middleware.customauth import require_auth
+"""
+Routes package: Exposes only the Blueprints for app registration.
+"""
 from backend.routes.users import users_bp
+from backend.routes.friends import friends_bp
 
-# exposed methods
-__all__ = ["users_bp"]
+# This keeps your app-level imports clean: 
+# 'from backend.routes import *' will only give you the blueprints.
+__all__ = ["users_bp", "friends_bp"]

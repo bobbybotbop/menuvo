@@ -3,7 +3,6 @@ Schemas for authentication-related endpoints
 """
 from marshmallow import Schema, fields, validate
  
- 
 class CreateAccountSchema(Schema):
     """Schema for creating a new user account"""
     name = fields.Str(

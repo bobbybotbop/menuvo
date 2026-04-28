@@ -1,4 +1,4 @@
-from backend.models import db, DateTime, timedelta, get_utc_now
+from backend.models.base import db, DateTime, timedelta, get_utc_now
 
 class SessionToken(db.Model):
     """

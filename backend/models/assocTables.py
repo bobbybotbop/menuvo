@@ -1,4 +1,4 @@
-from backend.models import db
+from backend.models.base import db
 
 """
 Represent many to many relationship between the recipes and cookbooks. 
