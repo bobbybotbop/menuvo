@@ -1,6 +1,6 @@
 from flask import request, g, jsonify
 from functools import wraps
-from backend.models import User, SessionToken, db
+from backend.models import User, SessionToken
 
 def require_auth(f):
     """Decorator for token validation"""

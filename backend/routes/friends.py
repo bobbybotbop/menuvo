@@ -19,12 +19,8 @@ friends_bp = Blueprint("friends", __name__)
 def get_friends(user_id):
     """
     Get all the friends for user
-    """
-    user = User.query.get(user_id)
-    if not user:
-        error("User not found", 404)
-    
-    friends = user.get_friends()
+    """    
+    friends = g.user.get_friends()
 
     return success(
         {
@@ -40,11 +36,7 @@ def get_pending_requests(user_id):
     """
     Get all pending friend requests for user
     """
-    user = User.query.get(user_id)
-    if not user:
-        error("User not found", 404)
-    
-    pending = user.get_pending_requests()
+    pending = g.user.get_pending_requests()
 
     return success(
         {
@@ -54,6 +46,18 @@ def get_pending_requests(user_id):
         ]
         }, 200
     )
+
+@friends_bp.get("/<int:user_id>/friends/search/<string:name>")
+@require_auth
+def search_users(user_id, name):
+    """
+    Returns top 20 users that start with specified string
+    """
+    results = User.query.filter(
+        User.username.ilike(f"%{name}%")
+    ).all()
+    
+    return success({'results': [r.to_dict() for r in results]}, 200)
 
 @friends_bp.post("/<int:user_id>/friends/request/")
 @require_auth
