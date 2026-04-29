@@ -17,7 +17,7 @@ from backend.models import User, SessionToken, db, Friendship
 from backend.utils import error, success, generate_token
 
 # Local Schemas
-from backend.schemas import CreateAccountSchema, LoginSchema, AutoLoginSchema
+from backend.schemas import CreateAccountSchema, LoginSchema, AutoLoginSchema, FriendRequestSchema
 
 # Local Middleware
 from backend.middleware.customauth import require_auth
@@ -42,5 +42,6 @@ __all__ = [
     "CreateAccountSchema", 
     "LoginSchema", 
     "AutoLoginSchema", 
+    "FriendRequestSchema",
     "require_auth"
 ]

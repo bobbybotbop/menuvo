@@ -19,7 +19,7 @@ from backend.routes.dependecies import (
 
 users_bp = Blueprint("users", __name__)
 
-@users_bp.post("/create")
+@users_bp.post("/create/")
 def create_account():
     """
     Create a new user account
@@ -57,7 +57,7 @@ def create_account():
         201,
     )
 
-@users_bp.post("/login")
+@users_bp.post("/login/")
 def login():
     """
     Login a user with username and password.
@@ -93,7 +93,7 @@ def login():
         }
     )
 
-@users_bp.post("/autologin")
+@users_bp.post("/autologin/")
 def auto_login():
     """
     Automatically login in a user with session tokens
@@ -124,7 +124,7 @@ def auto_login():
         }
     )
 
-@users_bp.get("/users/<int:user_id>")
+@users_bp.get("/users/<int:user_id>/")
 @require_auth
 def get_user(user_id: int):
     """

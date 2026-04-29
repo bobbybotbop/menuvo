@@ -1,3 +1,6 @@
+"""
+Schemas for friends endpoints
+"""
 from marshmallow import Schema, fields, validate
 
 class FriendRequestSchema(Schema):

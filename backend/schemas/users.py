@@ -1,5 +1,5 @@
 """
-Schemas for authentication-related endpoints
+Schemas for user endpoints
 """
 from marshmallow import Schema, fields, validate
  
