@@ -104,7 +104,6 @@ def update_cookbook(cookbook_id):
         cookbook.name = data["name"]
     if "description" in data:
         cookbook.description = data["description"]
-    
     db.session.commit()
     
     return success(

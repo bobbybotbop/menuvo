@@ -26,7 +26,8 @@ class Cookbook(db.Model):
 
     def __init__(self, **kwargs):        
         self.name = kwargs.get("name")
-        self.description = kwargs.get("description")
+        self.description = kwargs.get("description", "")
+        self.creator_id = kwargs.get("creator_id")
 
     def serialize(self):
         """Full cookbook view"""
