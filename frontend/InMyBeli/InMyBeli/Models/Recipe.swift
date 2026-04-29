@@ -1,53 +1,59 @@
 import Foundation
 
-struct Ingredient: Identifiable, Hashable {
-    let id: UUID
+struct Ingredient: Codable, Identifiable, Hashable {
     let name: String
-    let amount: String
+    let amount: String?
 
-    init(id: UUID = UUID(), name: String, amount: String) {
-        self.id = id
+    var id: String { "\(name)|\(amount ?? "")" }
+
+    init(name: String, amount: String? = nil) {
         self.name = name
         self.amount = amount
     }
 }
 
-struct RecipeStep: Identifiable, Hashable {
-    let id: UUID
+struct Recipe: Codable, Identifiable, Hashable {
+    let id: Int
+    let creatorId: Int
     let title: String
-    let detail: String
+    let description: String?
+    let imageUrl: String?
+    let timeMinutes: Int?
+    let cuisine: String?
+    let servings: Int?
+    let ingredients: [Ingredient]
+    let instructions: [String]
 
-    init(id: UUID = UUID(), title: String, detail: String) {
-        self.id = id
-        self.title = title
-        self.detail = detail
+    enum CodingKeys: String, CodingKey {
+        case id, title, description, cuisine, servings, ingredients, instructions
+        case creatorId = "creator_id"
+        case imageUrl = "image_url"
+        case timeMinutes = "time_minutes"
+    }
+
+    var timeLabel: String? {
+        guard let timeMinutes else { return nil }
+        return "\(timeMinutes) min"
     }
 }
 
-struct Recipe: Identifiable, Hashable {
-    let id: UUID
-    let name: String
-    let time: String
-    let cuisine: String
-    let friendsSaved: Int
-    let ingredients: [Ingredient]
-    let steps: [RecipeStep]
+struct RecipePreview: Codable, Identifiable, Hashable {
+    let id: Int
+    let creatorId: Int
+    let title: String
+    let imageUrl: String?
+    let timeMinutes: Int?
+    let cuisine: String?
 
-    init(
-        id: UUID = UUID(),
-        name: String,
-        time: String,
-        cuisine: String,
-        friendsSaved: Int,
-        ingredients: [Ingredient] = [],
-        steps: [RecipeStep] = []
-    ) {
-        self.id = id
-        self.name = name
-        self.time = time
-        self.cuisine = cuisine
-        self.friendsSaved = friendsSaved
-        self.ingredients = ingredients
-        self.steps = steps
+    enum CodingKeys: String, CodingKey {
+        case id, title, cuisine
+        case creatorId = "creator_id"
+        case imageUrl = "image_url"
+        case timeMinutes = "time_minutes"
+    }
+
+    var timeLabel: String? {
+        guard let timeMinutes else { return nil }
+        return "\(timeMinutes) min"
     }
 }

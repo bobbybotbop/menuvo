@@ -5,35 +5,48 @@ private enum RecipeDetailTab {
 }
 
 struct RecipeDetailView: View {
-    let recipe: Recipe
+    let recipeId: Int
+    let initialTitle: String?
 
     @Environment(\.dismiss) private var dismiss
     @State private var selectedTab: RecipeDetailTab = .ingredients
+    @State private var recipe: Recipe?
+    @State private var loadError: String?
+    @State private var isLoading = false
+
+    init(recipeId: Int, initialTitle: String? = nil) {
+        self.recipeId = recipeId
+        self.initialTitle = initialTitle
+    }
+
+    init(preview: RecipePreview) {
+        self.recipeId = preview.id
+        self.initialTitle = preview.title
+    }
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 30) {
-                Text(recipe.name)
-                    .font(.system(size: 25, weight: .regular))
-                    .tracking(0.25)
-                    .foregroundColor(.black)
-                    .padding(.top, 20)
+            VStack(spacing: 28) {
+                header
 
                 heroImage
 
                 actionButtons
 
-                Divider()
-                    .padding(.horizontal, 21)
+                Rectangle()
+                    .fill(Theme.Palette.divider)
+                    .frame(height: 1)
+                    .padding(.horizontal, 22)
 
                 tabToggle
 
                 tabContent
-                    .padding(.horizontal, 37)
+                    .padding(.horizontal, 28)
                     .padding(.bottom, 30)
             }
+            .padding(.top, 12)
         }
-        .background(Color.white)
+        .background(Theme.Palette.background)
         .scrollIndicators(.hidden)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -41,49 +54,100 @@ struct RecipeDetailView: View {
                 Button {
                     dismiss()
                 } label: {
-                    HStack(spacing: 9) {
+                    HStack(spacing: 6) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 14, weight: .regular))
+                            .font(.system(size: 14, weight: .semibold))
                         Text("Back")
                             .font(.system(size: 15, weight: .regular))
                             .tracking(0.15)
                     }
-                    .foregroundColor(.black)
+                    .foregroundColor(Theme.Palette.darkBrown)
+                }
+            }
+        }
+        .task { await loadRecipe() }
+    }
+
+    private func loadRecipe() async {
+        guard recipe == nil else { return }
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            recipe = try await RecipeService.shared.fetchRecipe(id: recipeId)
+        } catch {
+            loadError = error.localizedDescription
+        }
+    }
+
+    private var displayTitle: String {
+        recipe?.title ?? initialTitle ?? ""
+    }
+
+    private var displayTime: String? {
+        if let mins = recipe?.timeMinutes { return "\(mins) minutes" }
+        return nil
+    }
+
+    private var displayCuisine: String? {
+        recipe?.cuisine
+    }
+
+    private var header: some View {
+        VStack(spacing: 6) {
+            Text(displayTitle)
+                .font(.system(size: 25, weight: .medium))
+                .tracking(0.25)
+                .foregroundColor(Theme.Palette.darkBrown)
+
+            let parts = [displayTime, displayCuisine].compactMap { $0 }.filter { !$0.isEmpty }
+            if !parts.isEmpty {
+                HStack(spacing: 6) {
+                    ForEach(Array(parts.enumerated()), id: \.offset) { index, value in
+                        if index > 0 {
+                            Circle()
+                                .fill(Theme.Palette.lightBrown)
+                                .frame(width: 2, height: 2)
+                        }
+                        Text(value)
+                            .font(.system(size: 15, weight: .regular))
+                            .tracking(0.15)
+                            .foregroundColor(Theme.Palette.lightBrown)
+                    }
                 }
             }
         }
     }
 
     private var heroImage: some View {
-        ZStack(alignment: .bottomLeading) {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(hex: "d9d9d9"))
-                .frame(height: 268)
-
-            HStack(spacing: 5) {
-                Text(recipe.time)
-                    .font(.system(size: 15, weight: .light))
-                    .tracking(0.15)
-                    .foregroundColor(.black)
-                Circle()
-                    .fill(Color.black)
-                    .frame(width: 2, height: 2)
-                Text(recipe.cuisine)
-                    .font(.system(size: 15, weight: .light))
-                    .tracking(0.15)
-                    .foregroundColor(.black)
+        Group {
+            if let imageUrl = recipe?.imageUrl, let url = URL(string: imageUrl) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    default:
+                        Theme.Palette.placeholder
+                    }
+                }
+            } else {
+                Theme.Palette.placeholder
+                    .overlay(
+                        Image(systemName: "fork.knife")
+                            .font(.system(size: 32, weight: .light))
+                            .foregroundColor(Theme.Palette.lightBrown.opacity(0.6))
+                    )
             }
-            .padding(.leading, 25)
-            .padding(.bottom, 20)
         }
-        .padding(.horizontal, 28)
+        .frame(height: 268)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding(.horizontal, 22)
     }
 
     private var actionButtons: some View {
-        HStack(spacing: 43) {
-            ActionIconButton(icon: "bookmark", label: "Save")
-            ActionIconButton(icon: "note.text.badge.plus", label: "Notes")
-            ActionIconButton(icon: "person.2", label: "Reviews")
+        HStack(spacing: 50) {
+            ActionIconButton(icon: "bookmark", label: "Save", bordered: false)
+            ActionIconButton(icon: "square.and.pencil", label: "Rate", bordered: false)
+            ActionIconButton(icon: "person.2", label: "Reviews", bordered: true)
         }
     }
 
@@ -98,22 +162,26 @@ struct RecipeDetailView: View {
     private func tabButton(title: String, tab: RecipeDetailTab, leading: Bool) -> some View {
         let isSelected = selectedTab == tab
         let shape = UnevenRoundedRectangle(
-            topLeadingRadius: leading ? 20 : 0,
-            bottomLeadingRadius: leading ? 20 : 0,
-            bottomTrailingRadius: leading ? 0 : 20,
-            topTrailingRadius: leading ? 0 : 20
+            topLeadingRadius: leading ? Theme.Radius.pill : 0,
+            bottomLeadingRadius: leading ? Theme.Radius.pill : 0,
+            bottomTrailingRadius: leading ? 0 : Theme.Radius.pill,
+            topTrailingRadius: leading ? 0 : Theme.Radius.pill
         )
         return Button {
             selectedTab = tab
         } label: {
             Text(title)
-                .font(.system(size: 20, weight: .regular))
-                .tracking(0.2)
-                .foregroundColor(isSelected ? .white : .black)
+                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
+                .tracking(0.15)
+                .foregroundColor(isSelected ? .white : Theme.Palette.lightBrown)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(isSelected ? Color(hex: "3a3a3a") : Color(hex: "dfdede"))
-                .clipShape(shape)
+                .padding(.vertical, 12)
+                .background(
+                    shape.fill(isSelected ? Theme.Palette.lightBrown : Theme.Palette.cream)
+                )
+                .overlay(
+                    shape.stroke(Theme.Palette.lightBrown, lineWidth: isSelected ? 0 : 1)
+                )
         }
         .buttonStyle(.plain)
     }
@@ -129,18 +197,34 @@ struct RecipeDetailView: View {
     }
 
     private var ingredientList: some View {
-        VStack(spacing: 20) {
-            ForEach(recipe.ingredients) { ingredient in
-                HStack {
-                    Text(ingredient.name)
-                        .font(.system(size: 15, weight: .regular))
-                        .tracking(0.15)
-                        .foregroundColor(.black)
-                    Spacer()
-                    Text(ingredient.amount)
-                        .font(.system(size: 15, weight: .semibold))
-                        .tracking(0.15)
-                        .foregroundColor(.black)
+        let ingredients = recipe?.ingredients ?? []
+        return VStack(spacing: 18) {
+            if isLoading && ingredients.isEmpty {
+                ProgressView().tint(Theme.Palette.lightBrown)
+            } else if let error = loadError, ingredients.isEmpty {
+                Text(error)
+                    .font(.system(size: 13))
+                    .foregroundColor(Theme.Palette.lightBrown.opacity(0.7))
+                    .multilineTextAlignment(.center)
+            } else if ingredients.isEmpty {
+                Text("No ingredients listed.")
+                    .font(.system(size: 14))
+                    .foregroundColor(Theme.Palette.lightBrown.opacity(0.6))
+            } else {
+                ForEach(ingredients) { ingredient in
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(ingredient.name)
+                            .font(.system(size: 15, weight: .regular))
+                            .tracking(0.15)
+                            .foregroundColor(Theme.Palette.darkBrown)
+                        Spacer()
+                        if let amount = ingredient.amount, !amount.isEmpty {
+                            Text(amount)
+                                .font(.system(size: 15, weight: .semibold))
+                                .tracking(0.15)
+                                .foregroundColor(Theme.Palette.orangeBrown)
+                        }
+                    }
                 }
             }
         }
@@ -148,29 +232,38 @@ struct RecipeDetailView: View {
     }
 
     private var stepList: some View {
-        VStack(spacing: 15) {
-            ForEach(recipe.steps) { step in
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(step.title)
-                        .font(.system(size: 16, weight: .semibold))
-                        .tracking(0.16)
-                        .foregroundColor(.black)
-                    Text(step.detail)
-                        .font(.system(size: 15, weight: .regular))
-                        .tracking(0.15)
-                        .foregroundColor(.black)
-                        .lineSpacing(5)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+        let steps = recipe?.instructions ?? []
+        return VStack(alignment: .leading, spacing: 14) {
+            if isLoading && steps.isEmpty {
+                ProgressView().tint(Theme.Palette.lightBrown)
+                    .frame(maxWidth: .infinity)
+            } else if steps.isEmpty {
+                Text("No steps listed.")
+                    .font(.system(size: 14))
+                    .foregroundColor(Theme.Palette.lightBrown.opacity(0.6))
+                    .frame(maxWidth: .infinity)
+            } else {
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Step \(index + 1)")
+                            .font(.system(size: 13, weight: .semibold))
+                            .tracking(0.13)
+                            .foregroundColor(Theme.Palette.lightBrown)
+                        Text(step)
+                            .font(.system(size: 15, weight: .regular))
+                            .tracking(0.15)
+                            .foregroundColor(Theme.Palette.darkBrown)
+                            .lineSpacing(4)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.Palette.cream)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Theme.Palette.lightBrown.opacity(0.2), lineWidth: 1)
+                    )
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 15)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(hex: "f8f8f8"))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color(hex: "e2e2e2"), lineWidth: 1)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 20))
             }
         }
     }
@@ -179,41 +272,31 @@ struct RecipeDetailView: View {
 private struct ActionIconButton: View {
     let icon: String
     let label: String
+    let bordered: Bool
 
     var body: some View {
-        VStack(spacing: 2) {
-            Image(systemName: icon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
-                .foregroundColor(.black)
-                .frame(width: 39, height: 39)
+        VStack(spacing: 6) {
+            ZStack {
+                if bordered {
+                    Circle()
+                        .stroke(Theme.Palette.darkBrown, lineWidth: 1)
+                        .frame(width: 39, height: 39)
+                }
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundColor(Theme.Palette.darkBrown)
+                    .frame(width: 39, height: 39)
+            }
             Text(label)
-                .font(.system(size: 15, weight: .regular))
-                .tracking(0.15)
-                .foregroundColor(.black)
+                .font(.system(size: 14, weight: .regular))
+                .tracking(0.14)
+                .foregroundColor(Theme.Palette.darkBrown)
         }
     }
 }
 
 #Preview {
     NavigationStack {
-        RecipeDetailView(
-            recipe: Recipe(
-                name: "Dish Name",
-                time: "Time",
-                cuisine: "Cuisine",
-                friendsSaved: 5,
-                ingredients: [
-                    Ingredient(name: "Ingredient 1", amount: "12 tsp"),
-                    Ingredient(name: "Ingredient 2", amount: "3 cups"),
-                    Ingredient(name: "Ingredient 3", amount: "5 oz"),
-                ],
-                steps: [
-                    RecipeStep(title: "Step 1", detail: "Place 10tsp of ingredient 1 into a bowl with 2 cups of ingredient 2"),
-                    RecipeStep(title: "Step 2", detail: "Preheat oven to 350"),
-                ]
-            )
-        )
+        RecipeDetailView(recipeId: 1, initialTitle: "Tteokbokki")
     }
 }

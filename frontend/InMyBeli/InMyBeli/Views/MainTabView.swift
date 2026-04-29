@@ -14,6 +14,7 @@ struct MainTabView: View {
 
             TabBar(selectedTab: $selectedTab)
         }
+        .background(Theme.Palette.background)
         .ignoresSafeArea(edges: .bottom)
     }
 
@@ -23,18 +24,20 @@ struct MainTabView: View {
         case .discover:
             DiscoverView()
         case .create:
-            Text("Create")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.white)
+            placeholder("Create")
         case .cookbooks:
-            Text("Cookbooks")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.white)
+            placeholder("Cookbooks")
         case .profile:
-            Text("Profile")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.white)
+            placeholder("Profile")
         }
+    }
+
+    private func placeholder(_ label: String) -> some View {
+        Text(label)
+            .font(.system(size: 25, weight: .medium))
+            .foregroundColor(Theme.Palette.darkBrown)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Theme.Palette.background)
     }
 }
 
@@ -42,24 +45,41 @@ struct TabBar: View {
     @Binding var selectedTab: Tab
 
     var body: some View {
-        HStack(spacing: 25) {
-            TabBarItem(icon: "magnifyingglass", label: "Discover", isSelected: selectedTab == .discover) {
-                selectedTab = .discover
-            }
-            TabBarItem(icon: "square.and.pencil", label: "Create", isSelected: selectedTab == .create) {
-                selectedTab = .create
-            }
-            TabBarItem(icon: "book", label: "Cookbooks", isSelected: selectedTab == .cookbooks) {
-                selectedTab = .cookbooks
-            }
-            TabBarItem(icon: "person", label: "Profile", isSelected: selectedTab == .profile) {
-                selectedTab = .profile
-            }
+        HStack(spacing: 18) {
+            TabBarItem(
+                icon: "magnifyingglass",
+                label: "Discover",
+                isSelected: selectedTab == .discover
+            ) { selectedTab = .discover }
+
+            TabBarItem(
+                icon: "square.and.pencil",
+                label: "Create",
+                isSelected: selectedTab == .create
+            ) { selectedTab = .create }
+
+            TabBarItem(
+                icon: "book",
+                label: "Cookbooks",
+                isSelected: selectedTab == .cookbooks
+            ) { selectedTab = .cookbooks }
+
+            TabBarItem(
+                icon: "person.crop.circle",
+                label: "Profile",
+                isSelected: selectedTab == .profile
+            ) { selectedTab = .profile }
         }
-        .padding(.top, 20)
-        .padding(.bottom, 24)
+        .padding(.horizontal, 16)
+        .padding(.top, 14)
+        .padding(.bottom, 22)
         .frame(maxWidth: .infinity)
-        .background(Color(hex: "fbfbfb"))
+        .background(Theme.Palette.tabBar)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Theme.Palette.lightBrown.opacity(0.12))
+                .frame(height: 1)
+        }
     }
 }
 
@@ -71,23 +91,21 @@ struct TabBarItem: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 2) {
+            VStack(spacing: 3) {
                 Image(systemName: icon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
+                    .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
+                    .frame(height: 24)
                 Text(label)
-                    .font(.system(size: 10, weight: .light))
+                    .font(.system(size: 10, weight: isSelected ? .semibold : .regular))
                     .tracking(0.1)
             }
-            .frame(width: 70, height: 55)
-            .foregroundColor(isSelected ? .white : .black)
-            .background {
-                if isSelected {
-                    RoundedRectangle(cornerRadius: 40)
-                        .fill(Color(hex: "383838"))
-                }
-            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .foregroundColor(isSelected ? Theme.Palette.cream : Theme.Palette.darkBrown)
+            .background(
+                RoundedRectangle(cornerRadius: Theme.Radius.tabItem)
+                    .fill(isSelected ? Theme.Palette.lightBrown : .clear)
+            )
         }
         .buttonStyle(.plain)
     }
