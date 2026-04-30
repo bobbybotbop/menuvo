@@ -2,9 +2,10 @@ __pycache__/
 *.py[cod]
 *.pyd
 .Python
-env/
+.env
 venv/
 .venv/
+middleware/
 
 # Local dev database
 *.db
