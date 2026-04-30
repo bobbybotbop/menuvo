@@ -2,83 +2,93 @@ import SwiftUI
 
 struct DiscoverView: View {
     @State private var searchText = ""
-    @State private var recipes: [Recipe] = [
-        Recipe(
-            name: "Dish Name",
-            time: "30 min",
-            cuisine: "Italian",
-            friendsSaved: 5,
-            ingredients: [
-                Ingredient(name: "Ingredient 1", amount: "12 tsp"),
-                Ingredient(name: "Ingredient 2", amount: "3 cups"),
-                Ingredient(name: "Ingredient 3", amount: "5 oz"),
-            ],
-            steps: [
-                RecipeStep(title: "Step 1", detail: "Place 10tsp of ingredient 1 into a bowl with 2 cups of ingredient 2"),
-                RecipeStep(title: "Step 2", detail: "Preheat oven to 350"),
-            ]
-        ),
-        Recipe(
-            name: "Dish Name",
-            time: "45 min",
-            cuisine: "Japanese",
-            friendsSaved: 8,
-            ingredients: [
-                Ingredient(name: "Ingredient 1", amount: "2 cups"),
-                Ingredient(name: "Ingredient 2", amount: "1 tbsp"),
-            ],
-            steps: [
-                RecipeStep(title: "Step 1", detail: "Combine ingredients in a pan."),
-                RecipeStep(title: "Step 2", detail: "Cook over medium heat for 10 minutes."),
-            ]
-        ),
-        Recipe(
-            name: "Dish Name",
-            time: "20 min",
-            cuisine: "Mexican",
-            friendsSaved: 12,
-            ingredients: [
-                Ingredient(name: "Ingredient 1", amount: "4 oz"),
-                Ingredient(name: "Ingredient 2", amount: "1 cup"),
-            ],
-            steps: [
-                RecipeStep(title: "Step 1", detail: "Mix everything together."),
-                RecipeStep(title: "Step 2", detail: "Serve immediately."),
-            ]
-        ),
-    ]
+    @State private var recipes: [RecipePreview] = []
+    @State private var isLoading = false
+    @State private var loadError: String?
+
+    var feedUserId: Int = 1
+
+    private var filteredRecipes: [RecipePreview] {
+        guard !searchText.isEmpty else { return recipes }
+        let needle = searchText.lowercased()
+        return recipes.filter {
+            $0.title.lowercased().contains(needle) ||
+            ($0.cuisine?.lowercased().contains(needle) ?? false)
+        }
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 40) {
+                VStack(alignment: .leading, spacing: 28) {
                     SearchBar(text: $searchText)
 
-                    VStack(alignment: .leading, spacing: 30) {
+                    VStack(alignment: .leading, spacing: 18) {
                         Text("Popular Recipes")
                             .font(.system(size: 25, weight: .medium))
-                            .foregroundColor(.black)
+                            .tracking(0.25)
+                            .foregroundColor(Theme.Palette.darkBrown)
 
-                        VStack(spacing: 24) {
-                            ForEach(recipes) { recipe in
-                                NavigationLink(value: recipe) {
-                                    RecipeCard(recipe: recipe)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
+                        recipesSection
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(.top, 16)
+                .padding(.top, 12)
                 .padding(.horizontal, 22)
                 .padding(.bottom, 16)
             }
-            .background(Color.white)
+            .background(Theme.Palette.background)
             .scrollIndicators(.hidden)
-            .navigationDestination(for: Recipe.self) { recipe in
-                RecipeDetailView(recipe: recipe)
+            .navigationDestination(for: RecipePreview.self) { preview in
+                RecipeDetailView(preview: preview)
             }
+            .task { await load() }
+            .refreshable { await load() }
+        }
+    }
+
+    @ViewBuilder
+    private var recipesSection: some View {
+        if isLoading && recipes.isEmpty {
+            HStack {
+                Spacer()
+                ProgressView().tint(Theme.Palette.lightBrown)
+                Spacer()
+            }
+            .padding(.top, 40)
+        } else if let loadError, recipes.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Couldn't load recipes")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(Theme.Palette.darkBrown)
+                Text(loadError)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(Theme.Palette.lightBrown.opacity(0.8))
+            }
+        } else if recipes.isEmpty {
+            Text("No recipes yet — be the first to create one.")
+                .font(.system(size: 14))
+                .foregroundColor(Theme.Palette.lightBrown.opacity(0.7))
+        } else {
+            VStack(spacing: 26) {
+                ForEach(filteredRecipes) { preview in
+                    NavigationLink(value: preview) {
+                        RecipeCard(preview: preview)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private func load() async {
+        isLoading = true
+        loadError = nil
+        defer { isLoading = false }
+        do {
+            recipes = try await RecipeService.shared.fetchRecipes(forUserId: feedUserId)
+        } catch {
+            loadError = error.localizedDescription
         }
     }
 }

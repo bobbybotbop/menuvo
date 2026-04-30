@@ -1,50 +1,82 @@
 import SwiftUI
 
 struct RecipeCard: View {
-    let recipe: Recipe
+    let title: String
+    let imageUrl: String?
+    let timeLabel: String?
+    let cuisine: String?
+
+    init(preview: RecipePreview) {
+        self.title = preview.title
+        self.imageUrl = preview.imageUrl
+        self.timeLabel = preview.timeLabel
+        self.cuisine = preview.cuisine
+    }
+
+    init(title: String, imageUrl: String?, timeLabel: String?, cuisine: String?) {
+        self.title = title
+        self.imageUrl = imageUrl
+        self.timeLabel = timeLabel
+        self.cuisine = cuisine
+    }
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(hex: "e7e7e7"))
+        VStack(alignment: .leading, spacing: 10) {
+            heroImage
+                .frame(height: 180)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
 
-            VStack(alignment: .leading, spacing: 5) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(recipe.name)
-                        .font(.system(size: 25, weight: .regular))
-                        .tracking(0.25)
-                        .foregroundColor(.black)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 18, weight: .medium))
+                    .tracking(0.18)
+                    .foregroundColor(Theme.Palette.darkBrown)
+                    .lineLimit(1)
 
-                    HStack(spacing: 5) {
-                        Text(recipe.time)
-                            .font(.system(size: 15, weight: .light))
-                            .tracking(0.15)
-                            .foregroundColor(.black)
-                        Circle()
-                            .fill(Color.black)
-                            .frame(width: 2, height: 2)
-                        Text(recipe.cuisine)
-                            .font(.system(size: 15, weight: .light))
-                            .tracking(0.15)
-                            .foregroundColor(.black)
-                    }
-                }
+                metaLine
+            }
+            .padding(.horizontal, 4)
+        }
+    }
 
-                HStack(spacing: 5) {
-                    Image(systemName: "person.2.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 11)
-                        .foregroundColor(.black)
-                    Text("\(recipe.friendsSaved)+ friends saved")
-                        .font(.system(size: 9, weight: .light))
-                        .tracking(0.09)
-                        .foregroundColor(.black)
+    @ViewBuilder
+    private var heroImage: some View {
+        if let imageUrl, let url = URL(string: imageUrl) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image.resizable().scaledToFill()
+                default:
+                    Theme.Palette.placeholder
                 }
             }
-            .padding(.leading, 30)
-            .padding(.bottom, 30)
+        } else {
+            Theme.Palette.placeholder
+                .overlay(
+                    Image(systemName: "fork.knife")
+                        .font(.system(size: 28, weight: .light))
+                        .foregroundColor(Theme.Palette.lightBrown.opacity(0.6))
+                )
         }
-        .frame(height: 202)
+    }
+
+    @ViewBuilder
+    private var metaLine: some View {
+        let parts = [timeLabel, cuisine].compactMap { $0 }.filter { !$0.isEmpty }
+        if !parts.isEmpty {
+            HStack(spacing: 6) {
+                ForEach(Array(parts.enumerated()), id: \.offset) { index, value in
+                    if index > 0 {
+                        Circle()
+                            .fill(Theme.Palette.lightBrown)
+                            .frame(width: 2, height: 2)
+                    }
+                    Text(value)
+                        .font(.system(size: 13, weight: .regular))
+                        .tracking(0.13)
+                        .foregroundColor(Theme.Palette.lightBrown)
+                }
+            }
+        }
     }
 }
