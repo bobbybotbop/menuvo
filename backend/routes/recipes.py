@@ -2,6 +2,7 @@ from datetime import timezone
 from collections import defaultdict
 
 from sqlalchemy import func
+import json
 
 from backend.routes.dependencies import (
     Blueprint,
@@ -82,21 +83,13 @@ def create_recipe():
 
     try:
         raw_data = request.form.to_dict()
-        # Remove ingredients and instructions before schema validation since they'll be empty lists
-        raw_data.pop('ingredients', None)
-        raw_data.pop('instructions', None)
         form_data = schema.load(raw_data)
     except ValidationError as err:
         return error(err.messages, 400)
 
     file = request.files.get("image")
-
     recipe_image_s3_key = None
     recipe_image_url = None
-    
-    # Set ingredients and instructions to empty lists
-    form_data['ingredients'] = []
-    form_data['instructions'] = []
 
     if file:
         try:
@@ -110,7 +103,6 @@ def create_recipe():
 
         except Exception as e:
             return error(f"Upload error: {str(e)}", 500)
-    
 
     try:
         recipe = Recipe(
