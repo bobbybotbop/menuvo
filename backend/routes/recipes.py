@@ -1,8 +1,14 @@
+from datetime import timezone
+from collections import defaultdict
+
+from sqlalchemy import func
+
 from backend.routes.dependencies import (
     Blueprint,
     request,
     db,
     g,
+    Cookbook,
     Recipe,
     Review,
     error,
@@ -14,8 +20,54 @@ from backend.routes.dependencies import (
     UpdateRecipeSchema,
     CreateReviewSchema,
 )
+from backend.models.assocTables import cookbookRecipes
 
 recipes_bp = Blueprint("recipes", __name__)
+
+
+def _feed_day_key(created_at):
+    if created_at is None:
+        return None
+    dt = created_at
+    if dt.tzinfo is not None:
+        dt = dt.astimezone(timezone.utc)
+    return dt.date()
+
+
+def _total_saves_by_recipe_id():
+    """Distinct users per recipe via global per-user cookbook named 'saved'."""
+    rows = (
+        db.session.query(
+            cookbookRecipes.c.recipe_id,
+            func.count(func.distinct(Cookbook.creator_id)),
+        )
+        .join(Cookbook, Cookbook.id == cookbookRecipes.c.cookbook_id)
+        .filter(Cookbook.name == "saved")
+        .group_by(cookbookRecipes.c.recipe_id)
+        .all()
+    )
+    return {recipe_id: int(cnt) for recipe_id, cnt in rows}
+
+
+def _recipes_feed_ordered(recipes, friend_ids):
+    """
+    Newest calendar days first; within each day, recipes by friends first,
+    then others; preserving descending created_at within each subgroup.
+    """
+    buckets = defaultdict(list)
+    for recipe in recipes:
+        buckets[_feed_day_key(recipe.created_at)].append(recipe)
+
+    ordered_days = sorted(buckets.keys(), reverse=True)
+    ordered_recipes = []
+    for day in ordered_days:
+        day_recipes = buckets[day]
+        friends_first = [r for r in day_recipes if r.creator_id in friend_ids]
+        others = [r for r in day_recipes if r.creator_id not in friend_ids]
+        friends_first.sort(key=lambda r: r.created_at, reverse=True)
+        others.sort(key=lambda r: r.created_at, reverse=True)
+        ordered_recipes.extend(friends_first + others)
+    return ordered_recipes
 
 @recipes_bp.post("/recipes/")
 @require_auth
@@ -129,6 +181,27 @@ def get_recipes_by_user(user_id):
         },
         200,
     )
+
+
+@recipes_bp.get("/feed/recipes/")
+@require_auth
+def get_recipe_feed():
+    """
+    All recipes for Discover: reverse chronological by day; friends prioritized within each day.
+    Preview includes total_saves_count from each user's global 'saved' cookbook.
+    """
+    saves_counts = _total_saves_by_recipe_id()
+    recipes = Recipe.query.order_by(Recipe.created_at.desc()).all()
+    friend_ids = {u.id for u in g.user.get_friends()}
+    ordered = _recipes_feed_ordered(recipes, friend_ids)
+    payload = [
+        r.serialize_preview(
+            total_saves_count=saves_counts.get(r.id, 0),
+        )
+        for r in ordered
+    ]
+    return success({"recipes": payload}, 200)
+
 
 @recipes_bp.post("/recipes/<int:recipe_id>/reviews/")
 @require_auth

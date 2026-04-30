@@ -9,7 +9,10 @@ def create_app():
     app = Flask(__name__)
     
     # Configuration with enviromental variables
-    db_filename = "inmybeli.db"
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    instance_dir = os.path.join(backend_dir, "instance")
+    os.makedirs(instance_dir, exist_ok=True)
+    db_filename = os.path.join(instance_dir, "inmybeli.db")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
         "DATABASE_URL", 
         f"sqlite:///{db_filename}"

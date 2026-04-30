@@ -8,6 +8,8 @@ class Cookbook(db.Model):
     
     Invariants:
     - every cookbook must refer to a valid recipe in the database
+    - a global per-user cookbook named "saved" tracks user-recipe save relationships
+      and is the source of truth for computing recipe total save counts in feed previews
     """
     __tablename__ = "cookbooks"
 
