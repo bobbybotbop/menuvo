@@ -24,7 +24,7 @@ struct MainTabView: View {
         case .discover:
             DiscoverView()
         case .create:
-            placeholder("Create")
+            CreateView()
         case .cookbooks:
             placeholder("Cookbooks")
         case .profile:

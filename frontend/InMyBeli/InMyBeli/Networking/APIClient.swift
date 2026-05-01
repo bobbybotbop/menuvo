@@ -27,6 +27,44 @@ final class APIClient {
         return try await request(path: path, method: "POST", body: data, contentType: "application/json", as: T.self)
     }
 
+    func postMultipart<T: Decodable>(
+        _ path: String,
+        fields: [String: String],
+        imageData: Data?,
+        as type: T.Type
+    ) async throws -> T {
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var body = Data()
+
+        func append(_ string: String) {
+            if let data = string.data(using: .utf8) { body.append(data) }
+        }
+
+        for (key, value) in fields {
+            append("--\(boundary)\r\n")
+            append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n")
+            append("\(value)\r\n")
+        }
+
+        if let imageData {
+            append("--\(boundary)\r\n")
+            append("Content-Disposition: form-data; name=\"image\"; filename=\"recipe.jpg\"\r\n")
+            append("Content-Type: image/jpeg\r\n\r\n")
+            body.append(imageData)
+            append("\r\n")
+        }
+
+        append("--\(boundary)--\r\n")
+
+        return try await request(
+            path: path,
+            method: "POST",
+            body: body,
+            contentType: "multipart/form-data; boundary=\(boundary)",
+            as: type
+        )
+    }
+
     func postForm<T: Decodable>(_ path: String, fields: [String: String], as: T.Type) async throws -> T {
         let body = fields
             .map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }

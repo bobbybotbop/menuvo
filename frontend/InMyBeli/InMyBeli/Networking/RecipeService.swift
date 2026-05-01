@@ -39,4 +39,38 @@ final class RecipeService {
     func fetchRecipe(id: Int) async throws -> Recipe {
         try await client.get("recipes/\(id)/", as: Recipe.self)
     }
+
+    func createRecipe(
+        title: String,
+        timeMinutes: Int?,
+        servings: Int?,
+        cuisine: String?,
+        ingredients: [[String: String]],
+        instructions: [String],
+        imageData: Data?
+    ) async throws -> Recipe {
+        var fields: [String: String] = ["title": title]
+        if let timeMinutes { fields["time_minutes"] = "\(timeMinutes)" }
+        if let servings { fields["servings"] = "\(servings)" }
+        if let cuisine, !cuisine.isEmpty { fields["cuisine"] = cuisine }
+
+        if !ingredients.isEmpty,
+           let jsonData = try? JSONSerialization.data(withJSONObject: ingredients),
+           let jsonStr = String(data: jsonData, encoding: .utf8) {
+            fields["ingredients"] = jsonStr
+        }
+
+        if !instructions.isEmpty,
+           let jsonData = try? JSONSerialization.data(withJSONObject: instructions),
+           let jsonStr = String(data: jsonData, encoding: .utf8) {
+            fields["instructions"] = jsonStr
+        }
+
+        return try await client.postMultipart(
+            "recipes/",
+            fields: fields,
+            imageData: imageData,
+            as: Recipe.self
+        )
+    }
 }
