@@ -28,10 +28,6 @@ struct LoginView: View {
                 Spacer().frame(height: 120)
 
                 VStack(spacing: 0) {
-                    profilePhotoBlock
-
-                    Spacer().frame(height: 60)
-
                     VStack(spacing: 30) {
                         field(label: "Username") {
                             TextField("", text: $usernameOrName, prompt: placeholderText("Begin typing..."))
@@ -73,17 +69,6 @@ struct LoginView: View {
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.Palette.background)
-    }
-
-    private var profilePhotoBlock: some View {
-        VStack(spacing: 8) {
-            Circle()
-                .fill(Color(hex: "EFEFEF"))
-                .frame(width: 115, height: 115)
-            Text("Add Photo")
-                .font(.system(size: 13, weight: .regular))
-                .foregroundColor(Color(hex: "888888"))
-        }
     }
 
     private func placeholderText(_ text: String) -> Text {
