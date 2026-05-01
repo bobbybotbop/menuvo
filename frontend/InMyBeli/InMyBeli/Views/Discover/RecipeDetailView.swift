@@ -51,18 +51,7 @@ struct RecipeDetailView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 14, weight: .semibold))
-                        Text("Back")
-                            .font(.system(size: 15, weight: .regular))
-                            .tracking(0.15)
-                    }
-                    .foregroundColor(Theme.Palette.darkBrown)
-                }
+                BackButton { dismiss() }
             }
         }
         .task { await loadRecipe() }

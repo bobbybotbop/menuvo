@@ -40,7 +40,7 @@ struct WelcomeView: View {
                 .foregroundColor(Theme.Palette.darkBrown)
                 .multilineTextAlignment(.center)
         }
-        .frame(width: 174)
+        .frame(width: 196)
     }
 
     private var tagline: some View {
@@ -49,7 +49,7 @@ struct WelcomeView: View {
             .tracking(0.48) // 2% of 24pt
             .foregroundColor(.black)
             .multilineTextAlignment(.center)
-            .frame(width: 235)
+            .frame(width: 256)
     }
 
     private var buttons: some View {

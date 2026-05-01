@@ -90,16 +90,8 @@ struct CreateRecipeView: View {
 
     private var topBar: some View {
         HStack {
-            Button {
+            BackButton {
                 if currentStep > 1 { currentStep -= 1 } else { dismiss() }
-            } label: {
-                HStack(spacing: 9) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 13, weight: .semibold))
-                    Text("Back")
-                        .font(.system(size: 15))
-                }
-                .foregroundColor(.black)
             }
             Spacer()
         }
@@ -111,23 +103,8 @@ struct CreateRecipeView: View {
     // MARK: - Progress Bar
 
     private var progressBar: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 0) {
-                Text("Step ").font(.system(size: 15, weight: .light)).foregroundColor(.black)
-                Text("\(currentStep)").font(.system(size: 15, weight: .bold)).foregroundColor(Theme.Palette.orangeBrown)
-                Text(" of 3").font(.system(size: 15, weight: .light)).foregroundColor(.black)
-            }
-            .padding(.leading, 3)
-
-            HStack(spacing: 5) {
-                ForEach(1...3, id: \.self) { seg in
-                    Capsule()
-                        .fill(currentStep >= seg ? Theme.Palette.lightBrown : Color(hex: "EFEFEF"))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 12)
-                }
-            }
-        }
+        StepProgressBar(currentStep: currentStep, totalSteps: 3)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Dish Name Row

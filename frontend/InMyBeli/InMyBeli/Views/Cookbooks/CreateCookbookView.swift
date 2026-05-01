@@ -116,11 +116,7 @@ struct CreateCookbookView: View {
                     .padding(.vertical, 10)
                     .background(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(Color(hex: "F6F6F6"))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(Color(hex: "A4A4A4"), lineWidth: 1)
+                            .fill(Color(hex: "EFEFEF"))
                     )
             }
             .buttonStyle(.plain)

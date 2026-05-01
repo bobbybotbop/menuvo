@@ -7,7 +7,7 @@ struct APIError: Error, LocalizedError {
 final class APIClient {
     static let shared = APIClient()
 
-    var baseURL: URL = URL(string: "http://localhost:5001/api/")!
+    var baseURL: URL = URL(string: "https://e7a0-128-84-126-121.ngrok-free.app/api/")!
     var sessionToken: String?
 
     private let session: URLSession
@@ -31,6 +31,8 @@ final class APIClient {
         _ path: String,
         fields: [String: String],
         imageData: Data?,
+        imageFieldName: String = "image",
+        imageFileName: String = "recipe.jpg",
         as type: T.Type
     ) async throws -> T {
         let boundary = "Boundary-\(UUID().uuidString)"
@@ -48,7 +50,7 @@ final class APIClient {
 
         if let imageData {
             append("--\(boundary)\r\n")
-            append("Content-Disposition: form-data; name=\"image\"; filename=\"recipe.jpg\"\r\n")
+            append("Content-Disposition: form-data; name=\"\(imageFieldName)\"; filename=\"\(imageFileName)\"\r\n")
             append("Content-Type: image/jpeg\r\n\r\n")
             body.append(imageData)
             append("\r\n")
