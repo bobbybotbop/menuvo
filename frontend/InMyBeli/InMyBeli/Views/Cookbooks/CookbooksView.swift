@@ -17,13 +17,13 @@ struct CookbooksView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 50) {
+                VStack(alignment: .leading, spacing: 48) {
                     header
 
                     contentBody
                 }
                 .padding(.top, 12)
-                .padding(.horizontal, 27)
+                .padding(.horizontal, 24)
                 .padding(.bottom, 24)
             }
             .background(Theme.Palette.background)
@@ -76,7 +76,7 @@ struct CookbooksView: View {
                     .foregroundColor(Theme.Palette.lightBrown.opacity(0.8))
             }
         } else {
-            VStack(alignment: .leading, spacing: 50) {
+            VStack(alignment: .leading, spacing: 48) {
                 myCookbooksSection
                 allSavedRecipesSection
             }
@@ -98,7 +98,7 @@ struct CookbooksView: View {
                         Image(systemName: "plus")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(Theme.Palette.darkBrown)
-                            .frame(width: 28, height: 28)
+                            .frame(width: 32, height: 32)
                     }
                     .buttonStyle(.plain)
                 }
@@ -137,7 +137,7 @@ struct CookbooksView: View {
                     .frame(height: 2)
             }
 
-            VStack(spacing: 26) {
+            VStack(spacing: 24) {
                 if savedRecipes.isEmpty {
                     Text("No saved recipes yet.")
                         .font(.system(size: 14))
@@ -201,7 +201,7 @@ private struct CookbookRow: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .frame(maxWidth: .infinity, minHeight: 85, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 88, alignment: .leading)
         .background(Theme.Palette.background)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(

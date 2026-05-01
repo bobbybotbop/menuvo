@@ -38,13 +38,13 @@ struct RecipeDetailView: View {
                 Rectangle()
                     .fill(Theme.Palette.divider)
                     .frame(height: 1)
-                    .padding(.horizontal, 22)
+                    .padding(.horizontal, 24)
 
                 tabToggle
 
                 tabContent
-                    .padding(.horizontal, 28)
-                    .padding(.bottom, 30)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 32)
             }
             .padding(.top, 12)
         }
@@ -64,7 +64,7 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $isSaveSheetPresented) {
             SaveToCookbookSheet(recipeId: recipeId, onSaved: {})
-                .presentationDetents([.height(469), .large])
+                .presentationDetents([.height(464), .large])
                 .presentationDragIndicator(.hidden)
         }
     }
@@ -139,13 +139,13 @@ struct RecipeDetailView: View {
                     )
             }
         }
-        .frame(height: 268)
+        .frame(height: 264)
         .clipShape(RoundedRectangle(cornerRadius: 20))
-        .padding(.horizontal, 22)
+        .padding(.horizontal, 24)
     }
 
     private var actionButtons: some View {
-        HStack(spacing: 50) {
+        HStack(spacing: 48) {
             Button {
                 isSaveSheetPresented = true
             } label: {
@@ -296,12 +296,12 @@ private struct ActionIconButton: View {
                 if bordered {
                     Circle()
                         .stroke(Theme.Palette.darkBrown, lineWidth: 1)
-                        .frame(width: 39, height: 39)
+                        .frame(width: 40, height: 40)
                 }
                 Image(systemName: icon)
                     .font(.system(size: 18, weight: .regular))
                     .foregroundColor(Theme.Palette.darkBrown)
-                    .frame(width: 39, height: 39)
+                    .frame(width: 40, height: 40)
             }
             Text(label)
                 .font(.system(size: 14, weight: .regular))

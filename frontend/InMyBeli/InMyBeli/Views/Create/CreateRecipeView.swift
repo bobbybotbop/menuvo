@@ -112,16 +112,21 @@ struct CreateRecipeView: View {
     private var dishNameRow: some View {
         HStack(spacing: 15) {
             if currentStep == 1 {
-                TextField("Recipe name", text: $title)
-                    .font(.system(size: 25, weight: .medium))
-                    .foregroundColor(Theme.Palette.darkBrown)
-                    .focused($titleFocused)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
+                TextField(
+                    "",
+                    text: $title,
+                    prompt: Text("Recipe name").foregroundColor(Theme.Palette.darkBrown.opacity(0.4))
+                )
+                .font(.system(size: 25, weight: .medium))
+                .foregroundStyle(Theme.Palette.darkBrown)
+                .tint(Theme.Palette.lightBrown)
+                .focused($titleFocused)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
             } else {
                 Text(title.isEmpty ? "Recipe name" : title)
                     .font(.system(size: 25, weight: .medium))
-                    .foregroundColor(title.isEmpty ? Theme.Palette.darkBrown.opacity(0.4) : Theme.Palette.darkBrown)
+                    .foregroundStyle(title.isEmpty ? Theme.Palette.darkBrown.opacity(0.4) : Theme.Palette.darkBrown)
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
             }
@@ -137,7 +142,11 @@ struct CreateRecipeView: View {
                         .font(.system(size: 12, weight: .light))
                         .foregroundColor(Color(hex: "888888"))
                 }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
         }
     }
 

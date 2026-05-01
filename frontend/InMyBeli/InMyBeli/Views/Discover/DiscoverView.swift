@@ -32,7 +32,7 @@ struct DiscoverView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.top, 12)
-                .padding(.horizontal, 22)
+                .padding(.horizontal, 24)
                 .padding(.bottom, 16)
             }
             .background(Theme.Palette.background)
@@ -68,7 +68,7 @@ struct DiscoverView: View {
                 .font(.system(size: 14))
                 .foregroundColor(Theme.Palette.lightBrown.opacity(0.7))
         } else {
-            VStack(spacing: 26) {
+            VStack(spacing: 24) {
                 ForEach(filteredRecipes) { preview in
                     NavigationLink(value: preview) {
                         RecipeCard(preview: preview)
