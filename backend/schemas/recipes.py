@@ -2,7 +2,6 @@
 Schemas for recipe endpoints
 """
 from marshmallow import Schema, fields, validate, pre_load
-from backend.schemas.helper import ImageField
 import json
 
 
@@ -18,7 +17,6 @@ class CreateRecipeSchema(Schema):
         allow_none=True,
         validate=validate.Length(max=2000)
     )
-    # image = ImageField(required=False)
     time_minutes = fields.Int(
         required=False,
         allow_none=True,
@@ -77,7 +75,6 @@ class UpdateRecipeSchema(Schema):
         allow_none=True,
         validate=validate.Length(max=2000)
     )
-    # image = ImageField(required=False)
     time_minutes = fields.Int(
         required=False,
         allow_none=True,
