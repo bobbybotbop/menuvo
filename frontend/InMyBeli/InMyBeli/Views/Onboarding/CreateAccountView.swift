@@ -19,7 +19,6 @@ struct CreateAccountView: View {
         case name, username, password, confirm
     }
 
-    // One-off Figma colors not promoted to Theme.
     private let fieldFill = Color(hex: "EFEFEF")
     private let placeholderGray = Color(hex: "888888")
     private let photoPlaceholder = Color(hex: "D9D9D9")
@@ -50,17 +49,17 @@ struct CreateAccountView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.top, 30)
 
-                VStack(spacing: 75) {
+                VStack(spacing: 80) {
                     VStack(spacing: 60) {
                         photoBlock
                         inputsBlock
                     }
-                    .frame(width: 329)
+                    .padding(.horizontal, 24)
 
                     continueSection
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.top, 50)
+                .padding(.top, 48)
                 .padding(.bottom, 40)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -186,7 +185,8 @@ struct CreateAccountView: View {
                 Text(message)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Theme.Palette.orangeBrown)
-                    .frame(width: 329, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
             }
 
             continueButton

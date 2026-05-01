@@ -63,7 +63,7 @@ struct CreateView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 4)
-            .padding(.bottom, 90)
+            .padding(.bottom, 88)
         }
     }
 

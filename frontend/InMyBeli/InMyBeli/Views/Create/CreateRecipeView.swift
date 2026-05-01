@@ -53,7 +53,7 @@ struct CreateRecipeView: View {
 
                         actionRow
                     }
-                    .padding(.horizontal, 29)
+                    .padding(.horizontal, 24)
                     .padding(.vertical, 20)
                 }
             }
@@ -69,14 +69,14 @@ struct CreateRecipeView: View {
             AddIngredientSheet { name, amount in
                 ingredients.append(DraftIngredient(name: name, amount: amount))
             }
-            .presentationDetents([.height(469)])
+            .presentationDetents([.height(464)])
             .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: $showAddStep) {
             AddStepSheet(stepNumber: stepDescriptions.count + 1) { desc in
                 stepDescriptions.append(desc)
             }
-            .presentationDetents([.height(430)])
+            .presentationDetents([.height(432)])
             .presentationDragIndicator(.hidden)
         }
         .alert("Error", isPresented: $showError) {
@@ -95,9 +95,9 @@ struct CreateRecipeView: View {
             }
             Spacer()
         }
-        .padding(.horizontal, 30)
-        .padding(.top, 30)
-        .padding(.bottom, 5)
+        .padding(.horizontal, 24)
+        .padding(.top, 32)
+        .padding(.bottom, 8)
     }
 
     // MARK: - Progress Bar
@@ -170,7 +170,7 @@ struct CreateRecipeView: View {
                 }
                 .padding(12)
             }
-            .frame(maxWidth: .infinity, maxHeight: 268)
+            .frame(maxWidth: .infinity, maxHeight: 264)
             .clipShape(RoundedRectangle(cornerRadius: 20))
         } else {
             PhotosPicker(selection: $selectedPhoto, matching: .images) {
@@ -178,7 +178,7 @@ struct CreateRecipeView: View {
                     RoundedRectangle(cornerRadius: 20)
                         .fill(Color(hex: "EFEFEF"))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 268)
+                        .frame(height: 264)
 
                     VStack(spacing: 10) {
                         Image(systemName: "photo.on.rectangle.angled")
@@ -395,7 +395,7 @@ struct AddIngredientSheet: View {
         VStack(spacing: 0) {
             Capsule()
                 .fill(Color(hex: "888888").opacity(0.3))
-                .frame(width: 97, height: 4)
+                .frame(width: 96, height: 4)
                 .padding(.top, 10)
 
             VStack(alignment: .leading, spacing: 30) {
@@ -409,7 +409,7 @@ struct AddIngredientSheet: View {
                     sheetField("Amount", placeholder: "Number and units...", text: $amount)
                 }
             }
-            .padding(.horizontal, 36)
+            .padding(.horizontal, 32)
 
             Spacer()
 
@@ -438,7 +438,7 @@ struct AddIngredientSheet: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .disabled(ingredientName.trimmingCharacters(in: .whitespaces).isEmpty)
             }
-            .padding(.horizontal, 36)
+            .padding(.horizontal, 32)
             .padding(.bottom, 40)
         }
         .background(Theme.Palette.background)
@@ -476,7 +476,7 @@ struct AddStepSheet: View {
         VStack(spacing: 0) {
             Capsule()
                 .fill(Color(hex: "888888").opacity(0.3))
-                .frame(width: 97, height: 4)
+                .frame(width: 96, height: 4)
                 .padding(.top, 10)
 
             VStack(alignment: .leading, spacing: 30) {
@@ -495,7 +495,7 @@ struct AddStepSheet: View {
                         .font(.system(size: 15, weight: .light))
                         .foregroundColor(.black)
                         .padding(10)
-                        .frame(height: 110)
+                        .frame(height: 112)
                         .background(Color(hex: "EFEFEF"))
                         .clipShape(RoundedRectangle(cornerRadius: 15))
                         .overlay(
@@ -513,7 +513,7 @@ struct AddStepSheet: View {
                         )
                 }
             }
-            .padding(.horizontal, 36)
+            .padding(.horizontal, 32)
 
             Spacer()
 
@@ -542,7 +542,7 @@ struct AddStepSheet: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .disabled(description.trimmingCharacters(in: .whitespaces).isEmpty)
             }
-            .padding(.horizontal, 36)
+            .padding(.horizontal, 32)
             .padding(.bottom, 40)
         }
         .background(Theme.Palette.background)

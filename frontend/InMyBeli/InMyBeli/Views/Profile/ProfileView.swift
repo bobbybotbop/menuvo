@@ -19,7 +19,7 @@ struct ProfileView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     profileHeader
-                        .padding(.horizontal, 22)
+                        .padding(.horizontal, 24)
                         .padding(.top, 24)
                         .padding(.bottom, 20)
 
@@ -30,9 +30,9 @@ struct ProfileView: View {
                     sectionPicker
 
                     sectionContent
-                        .padding(.horizontal, 22)
+                        .padding(.horizontal, 24)
                         .padding(.top, 16)
-                        .padding(.bottom, 30)
+                        .padding(.bottom, 32)
                 }
             }
             .background(Theme.Palette.background)
@@ -51,7 +51,7 @@ struct ProfileView: View {
         HStack(alignment: .center, spacing: 20) {
             Circle()
                 .fill(Theme.Palette.placeholder)
-                .frame(width: 101, height: 101)
+                .frame(width: 100, height: 100)
                 .overlay(
                     Image(systemName: "person.fill")
                         .font(.system(size: 48, weight: .light))

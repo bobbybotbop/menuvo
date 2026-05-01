@@ -9,58 +9,55 @@ struct WelcomeView: View {
             Theme.Palette.background
                 .ignoresSafeArea()
 
-            VStack(spacing: 30) {
+            VStack(spacing: 32) {
                 logoAndTagline
                 buttons
             }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.top, 228)
-            .frame(maxHeight: .infinity, alignment: .top)
+            .padding(.horizontal, 24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .padding(.top, 224)
         }
     }
 
     private var logoAndTagline: some View {
-        VStack(spacing: 25) {
+        VStack(spacing: 24) {
             logoBlock
             tagline
         }
     }
 
     private var logoBlock: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 8) {
             Image("MenuvoLogo")
                 .resizable()
                 .renderingMode(.original)
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 91, height: 95.79)
+                .frame(height: 96)
 
             Text("menuvo")
                 .font(.system(size: 50, weight: .medium))
-                .tracking(1.0) // 2% of 50pt
+                .tracking(1.0)
                 .foregroundColor(Theme.Palette.darkBrown)
                 .multilineTextAlignment(.center)
         }
-        .frame(width: 196)
     }
 
     private var tagline: some View {
         Text("Cooking is better with friends. Discover new recipes to make, review, and share.")
             .font(.system(size: 24, weight: .light))
-            .tracking(0.48) // 2% of 24pt
+            .tracking(0.48)
             .foregroundColor(.black)
             .multilineTextAlignment(.center)
-            .frame(width: 256)
     }
 
     private var buttons: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             Button(action: onCreateAccount) {
                 Text("Create an Account")
                     .font(.system(size: 20, weight: .medium))
                     .foregroundColor(Theme.Palette.cream)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 15)
-                    .padding(.horizontal, 12)
+                    .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 25, style: .continuous)
                             .fill(Theme.Palette.darkBrown)
@@ -73,8 +70,7 @@ struct WelcomeView: View {
                     .font(.system(size: 20, weight: .medium))
                     .foregroundColor(Theme.Palette.lightBrown)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 15)
-                    .padding(.horizontal, 12)
+                    .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 25, style: .continuous)
                             .fill(Theme.Palette.cream)
@@ -86,7 +82,6 @@ struct WelcomeView: View {
             }
             .buttonStyle(.plain)
         }
-        .frame(width: 230)
     }
 }
 

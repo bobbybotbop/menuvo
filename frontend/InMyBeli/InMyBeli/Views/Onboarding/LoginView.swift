@@ -60,11 +60,11 @@ struct LoginView: View {
                             .padding(.top, 12)
                     }
 
-                    Spacer().frame(height: 153)
+                    Spacer().frame(height: 160)
 
-                    continueButton
+                    PrimaryActionButton(isEnabled: canSubmit, isLoading: isSubmitting, action: submit)
                 }
-                .frame(width: 329)
+                .padding(.horizontal, 24)
 
                 Spacer().frame(height: 40)
             }
@@ -116,33 +116,6 @@ struct LoginView: View {
                         .fill(Color(hex: "EFEFEF"))
                 )
         }
-    }
-
-    private var continueButton: some View {
-        Button(action: submit) {
-            ZStack {
-                if isSubmitting {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(canSubmit ? Theme.Palette.cream : Color(hex: "A4A4A4"))
-                } else {
-                    Text("Continue")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(canSubmit ? Theme.Palette.cream : Color(hex: "A4A4A4"))
-                }
-            }
-            .frame(width: 230, height: 54)
-            .background(
-                RoundedRectangle(cornerRadius: 25, style: .continuous)
-                    .fill(canSubmit ? Theme.Palette.darkBrown : Color(hex: "F6F6F6"))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 25, style: .continuous)
-                    .stroke(canSubmit ? Color.clear : Color(hex: "A4A4A4"), lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-        .disabled(!canSubmit)
     }
 
     private func submit() {

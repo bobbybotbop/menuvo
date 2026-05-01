@@ -15,7 +15,7 @@ struct CreateCookbookView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 34) {
+            VStack(spacing: 32) {
                 title
 
                 form
@@ -25,7 +25,7 @@ struct CreateCookbookView: View {
                 actions
             }
             .padding(.top, 24)
-            .padding(.horizontal, 35)
+            .padding(.horizontal, 24)
             .padding(.bottom, 30)
             .background(Theme.Palette.background)
             .toolbar(.hidden, for: .navigationBar)
@@ -93,7 +93,7 @@ struct CreateCookbookView: View {
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .frame(height: 90)
+                    .frame(height: 96)
             }
         }
         .background(Theme.Palette.background)
