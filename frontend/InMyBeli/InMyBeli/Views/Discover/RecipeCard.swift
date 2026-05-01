@@ -21,22 +21,33 @@ struct RecipeCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 0) {
             heroImage
-                .frame(height: 180)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
+                .frame(maxWidth: .infinity)
+                .frame(height: 170)
+                .clipped()
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: 18, weight: .medium))
-                    .tracking(0.18)
+                    .font(.system(size: 17, weight: .semibold))
+                    .tracking(0.17)
                     .foregroundColor(Theme.Palette.darkBrown)
                     .lineLimit(1)
 
                 metaLine
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.white)
         }
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Theme.Palette.darkBrown.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: Theme.Palette.darkBrown.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 
     @ViewBuilder
@@ -68,7 +79,7 @@ struct RecipeCard: View {
                 ForEach(Array(parts.enumerated()), id: \.offset) { index, value in
                     if index > 0 {
                         Circle()
-                            .fill(Theme.Palette.lightBrown)
+                            .fill(Theme.Palette.lightBrown.opacity(0.6))
                             .frame(width: 2, height: 2)
                     }
                     Text(value)
