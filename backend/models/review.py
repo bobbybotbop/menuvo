@@ -27,6 +27,8 @@ class Review(db.Model):
         nullable=False,
     )
 
+    user = db.relationship('User', foreign_keys=[user_id])
+
     __table_args__ = (
         db.UniqueConstraint('user_id', 'recipe_id', name='uq_review_user_recipe'),
     )
@@ -44,6 +46,12 @@ class Review(db.Model):
             "recipe_id": self.recipe_id,
             "rating": self.rating,
             "text": self.text,
+            "user": {
+                "id": self.user.id,
+                "name": self.user.name,
+                "username": self.user.username,
+                "profile_url": self.user.profile_picture_url,
+            } if self.user else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

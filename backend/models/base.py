@@ -6,4 +6,4 @@ db = SQLAlchemy()
 
 def get_utc_now():
     """Return current UTC time"""
-    return datetime.now()
+    return datetime.now(timezone.utc)
