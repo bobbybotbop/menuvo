@@ -6,6 +6,15 @@
 http://localhost:5001/api
 ```
 
+Blueprints are mounted as follows (full paths below each endpoint):
+
+| Area      | Prefix           |
+|-----------|------------------|
+| Users     | `/api/users`     |
+| Friends   | `/api/friends`   |
+| Cookbooks | `/api/cookbooks` |
+| Recipes   | `/api`           |
+
 ## Authentication
 
 Most endpoints require Bearer token authentication. Include the token in the Authorization header:
@@ -68,7 +77,7 @@ curl -X POST http://localhost:5000/api/users/create \
 
 **Error Responses:**
 
-- `400 Bad Request` - Validation error (missing required fields, invalid field length)
+- `400 Bad Request` - Validation error (missing fields, invalid length); body may be Marshmallow field errors
 - `400 Bad Request` - Username already exists
 - `500 Internal Server Error` - Account creation failed or upload error
 
@@ -466,7 +475,7 @@ curl -X GET http://localhost:5000/api/users/1/recipes \
 **HTTP Method:** `GET`  
 **Route:** `/feed/recipes`  
 **Authentication:** Required (Bearer token)  
-**Description:** Get all recipes for the Discover feed. Recipes are ordered by date (newest first), with recipes from friends prioritized within each day. Includes save counts.
+**Description:** All recipes for discover: ordered by calendar day (newest days first); within each day, friends’ recipes first. Each preview may include `total_saves_count` (distinct users who saved the recipe via a per-user cookbook named `"saved"`) and `friend_saved_profile_picture_urls` — up to two profile picture URLs of the current user’s accepted friends who saved the recipe via their `"saved"` cookbook, ordered by friend user id ascending. The list is empty when no friend has saved the recipe.
 
 **Request Body:** None
 
@@ -489,7 +498,11 @@ curl -X GET http://localhost:5000/api/feed/recipes \
       "image_url": "https://s3.amazonaws.com/inmybeli/recipe/abc123.jpg",
       "time_minutes": 30,
       "cuisine": "Italian",
-      "total_saves_count": 12
+      "total_saves_count": 12,
+      "friend_saved_profile_picture_urls": [
+        "https://your-bucket.s3.amazonaws.com/profile/friend-a.jpg",
+        "https://your-bucket.s3.amazonaws.com/profile/friend-b.jpg"
+      ]
     },
     {
       "id": 6,
@@ -498,7 +511,8 @@ curl -X GET http://localhost:5000/api/feed/recipes \
       "image_url": "https://s3.amazonaws.com/inmybeli/recipe/def456.jpg",
       "time_minutes": 45,
       "cuisine": "Italian",
-      "total_saves_count": 8
+      "total_saves_count": 8,
+      "friend_saved_profile_picture_urls": []
     }
   ]
 }
@@ -1322,3 +1336,50 @@ curl -X GET http://localhost:5000/api/friends/2 \
 - `400 Bad Request` - Cannot check friendship with yourself
 - `401 Unauthorized` - Missing or invalid token
 - `404 Not Found` - Friend not found
+
+---
+
+## Error Handling
+
+Most errors from `error()` / `success()` helpers return JSON with an `error` key. The value is usually a **string**, but **Marshmallow validation** failures may pass a **nested object** (field names to message lists), for example:
+
+```json
+{
+  "error": {
+    "username": ["Username is required"]
+  }
+}
+```
+
+Simple string error:
+
+```json
+{
+  "error": "Recipe not found"
+}
+```
+
+The `@require_auth` decorator uses `jsonify` for missing/invalid tokens with the same `{"error": "..."}` shape and HTTP `401`.
+
+### Common HTTP Status Codes
+
+- `200 OK` - Request successful
+- `201 Created` - Resource created successfully
+- `400 Bad Request` - Invalid input or validation error
+- `401 Unauthorized` - Missing or invalid authentication token
+- `403 Forbidden` - Authenticated user doesn't have permission (e.g., trying to delete another user's recipe)
+- `404 Not Found` - Resource not found
+- `409 Conflict` - Resource conflict (e.g., duplicate entry)
+- `500 Internal Server Error` - Server error
+
+---
+
+## Notes
+
+- All timestamps are in ISO 8601 format with UTC timezone
+- Passwords are hashed using secure algorithms and never returned in responses
+- Session tokens are generated automatically and should be stored securely on the client
+- Users can only modify/delete their own resources (recipes, cookbooks)
+- Friendship relationships require mutual consent (pending → accepted)
+- `GET /api/cookbooks/<id>/` returns the cookbook if it exists (ownership is enforced on update/delete/add/remove recipe, not on this single GET in the current code).
+- Success responses are JSON bodies produced by `json.dumps`; set `Content-Type: application/json` on the client when sending JSON bodies.
