@@ -23,7 +23,6 @@ def create_app():
     db.init_app(app)
     
     with app.app_context():
-        db.drop_all()
         db.create_all()
     
     # Register blueprints
@@ -36,5 +35,5 @@ def create_app():
  
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
  

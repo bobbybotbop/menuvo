@@ -21,14 +21,14 @@ From `root`:
 python -m backend.app
 ```
 
-The server runs on `http://127.0.0.1:5000`.
+The server runs on `http://127.0.0.1:5001`.
 
 ## API
 
 ### Create account
 
 ```bash
-curl -X POST http://127.0.0.1:5000/api/create ^
+curl -X POST http://127.0.0.1:5001/api/create ^
   -H "Content-Type: application/json" ^
   -d "{\"name\":\"Bobby\",\"username\":\"bobby1\",\"email\":\"bobby@example.com\",\"password\":\"secret\"}"
 ```
@@ -36,7 +36,7 @@ curl -X POST http://127.0.0.1:5000/api/create ^
 ### Login
 
 ```bash
-curl -X POST http://127.0.0.1:5000/api/login ^
+curl -X POST http://127.0.0.1:5001/api/login ^
   -H "Content-Type: application/json" ^
   -d "{\"email\":\"bobby@example.com\",\"password\":\"secret\"}"
 ```
@@ -44,5 +44,5 @@ curl -X POST http://127.0.0.1:5000/api/login ^
 ### Get user
 
 ```bash
-curl http://127.0.0.1:5000/api/users/1
+curl http://127.0.0.1:5001/api/users/1
 ```
