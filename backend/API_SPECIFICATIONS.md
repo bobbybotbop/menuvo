@@ -5,7 +5,7 @@
 Default local server:
 
 ```
-http://127.0.0.1:5000
+http://127.0.0.1:5001
 ```
 
 Blueprints are mounted as follows (full paths below each endpoint):
