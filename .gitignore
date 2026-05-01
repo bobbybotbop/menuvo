@@ -9,3 +9,7 @@ venv/
 # Local dev database
 *.db
 .DS_Store
+
+# Environment secrets
+.env
+.env.*

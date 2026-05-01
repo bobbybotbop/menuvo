@@ -184,9 +184,6 @@ struct CreateRecipeView: View {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 268)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
 
                 PhotosPicker(selection: $selectedPhoto, matching: .images) {
                     Image(systemName: "pencil.circle.fill")
@@ -196,6 +193,8 @@ struct CreateRecipeView: View {
                 }
                 .padding(12)
             }
+            .frame(maxWidth: .infinity, maxHeight: 268)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
         } else {
             PhotosPicker(selection: $selectedPhoto, matching: .images) {
                 ZStack {
