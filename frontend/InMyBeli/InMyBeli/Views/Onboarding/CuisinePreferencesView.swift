@@ -19,10 +19,10 @@ struct CuisinePreferencesView: View {
                 heading
                 cuisineChips
             }
-            .padding(.horizontal, 38)
-            .padding(.top, 75)
+            .padding(.horizontal, 24)
+            .padding(.top, 80)
 
-            Spacer(minLength: 30)
+            Spacer(minLength: 24)
 
             PrimaryActionButton(action: { onContinue(selected) })
                 .padding(.bottom, 40)
@@ -36,14 +36,13 @@ struct CuisinePreferencesView: View {
             Image(systemName: "fork.knife")
                 .font(.system(size: 44, weight: .regular))
                 .foregroundColor(Theme.Palette.darkBrown)
-                .frame(height: 53)
+                .frame(height: 48)
 
             Text("What do you like to cook?")
                 .font(.system(size: 30, weight: .medium))
                 .tracking(0.3)
                 .foregroundColor(Theme.Palette.darkBrown)
                 .multilineTextAlignment(.center)
-                .frame(width: 247)
 
             Text("Select some cuisines.")
                 .font(.system(size: 18, weight: .light))

@@ -34,5 +34,6 @@ struct SearchBar: View {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(Color(.systemGray6))
         )
+        .colorScheme(.light)
     }
 }

@@ -41,7 +41,7 @@ struct FindFriendsView: View {
             searchField
             list
         }
-        .frame(width: 320)
+        .padding(.horizontal, 24)
         .frame(maxWidth: .infinity)
     }
 
@@ -50,14 +50,13 @@ struct FindFriendsView: View {
             Image(systemName: "person.2.fill")
                 .font(.system(size: 36, weight: .regular))
                 .foregroundColor(Theme.Palette.darkBrown)
-                .frame(height: 43)
+                .frame(height: 40)
 
             Text("Add your friends.")
                 .font(.system(size: 30, weight: .medium))
                 .tracking(0.3)
                 .foregroundColor(Theme.Palette.darkBrown)
                 .multilineTextAlignment(.center)
-                .frame(width: 257)
         }
         .frame(maxWidth: .infinity)
     }
@@ -108,7 +107,7 @@ struct FindFriendsView: View {
             )
         } else {
             ScrollView {
-                WrappedHStack(spacing: 15, runSpacing: 35) {
+                WrappedHStack(spacing: 15, runSpacing: 32) {
                     ForEach(results) { candidate in
                         FriendCard(
                             candidate: candidate,
@@ -134,7 +133,6 @@ struct FindFriendsView: View {
                 .foregroundColor(Theme.Palette.lightBrown.opacity(0.8))
                 .multilineTextAlignment(.center)
         }
-        .padding(.horizontal, 36)
         .frame(maxWidth: .infinity, minHeight: 160)
     }
 
@@ -205,7 +203,7 @@ private struct FriendCard: View {
                 Text(requested ? "Added" : "Add")
                     .font(.system(size: 15, weight: requested ? .medium : .light))
                     .foregroundColor(requested ? cream : Theme.Palette.lightBrown)
-                    .frame(width: requested ? 83 : 79)
+                    .frame(width: 80)
                     .padding(.vertical, 5)
                     .background(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)

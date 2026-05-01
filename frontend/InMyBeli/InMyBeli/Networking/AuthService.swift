@@ -25,12 +25,32 @@ final class AuthService {
     }
 
     @discardableResult
-    func createAccount(name: String, username: String, password: String) async throws -> AuthSession {
-        let response = try await client.postForm(
-            "users/create",
-            fields: ["name": name, "username": username, "password": password],
-            as: CreateAccountResponse.self
-        )
+    func createAccount(
+        name: String,
+        username: String,
+        password: String,
+        profilePictureData: Data? = nil
+    ) async throws -> AuthSession {
+        let fields = ["name": name, "username": username, "password": password]
+
+        let response: CreateAccountResponse
+        if let profilePictureData {
+            response = try await client.postMultipart(
+                "users/create",
+                fields: fields,
+                imageData: profilePictureData,
+                imageFieldName: "profile_picture",
+                imageFileName: "profile.jpg",
+                as: CreateAccountResponse.self
+            )
+        } else {
+            response = try await client.postForm(
+                "users/create",
+                fields: fields,
+                as: CreateAccountResponse.self
+            )
+        }
+
         APIClient.shared.sessionToken = response.sessionToken
         return AuthSession(user: response.user, token: response.sessionToken)
     }

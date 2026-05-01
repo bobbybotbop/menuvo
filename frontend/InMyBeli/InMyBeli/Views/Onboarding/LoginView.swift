@@ -28,10 +28,6 @@ struct LoginView: View {
                 Spacer().frame(height: 120)
 
                 VStack(spacing: 0) {
-                    profilePhotoBlock
-
-                    Spacer().frame(height: 60)
-
                     VStack(spacing: 30) {
                         field(label: "Username") {
                             TextField("", text: $usernameOrName, prompt: placeholderText("Begin typing..."))
@@ -60,11 +56,11 @@ struct LoginView: View {
                             .padding(.top, 12)
                     }
 
-                    Spacer().frame(height: 153)
+                    Spacer().frame(height: 160)
 
-                    continueButton
+                    PrimaryActionButton(isEnabled: canSubmit, isLoading: isSubmitting, action: submit)
                 }
-                .frame(width: 329)
+                .padding(.horizontal, 24)
 
                 Spacer().frame(height: 40)
             }
@@ -73,17 +69,6 @@ struct LoginView: View {
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.Palette.background)
-    }
-
-    private var profilePhotoBlock: some View {
-        VStack(spacing: 8) {
-            Circle()
-                .fill(Color(hex: "EFEFEF"))
-                .frame(width: 115, height: 115)
-            Text("Add Photo")
-                .font(.system(size: 13, weight: .regular))
-                .foregroundColor(Color(hex: "888888"))
-        }
     }
 
     private func placeholderText(_ text: String) -> Text {
@@ -116,33 +101,6 @@ struct LoginView: View {
                         .fill(Color(hex: "EFEFEF"))
                 )
         }
-    }
-
-    private var continueButton: some View {
-        Button(action: submit) {
-            ZStack {
-                if isSubmitting {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(canSubmit ? Theme.Palette.cream : Color(hex: "A4A4A4"))
-                } else {
-                    Text("Continue")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(canSubmit ? Theme.Palette.cream : Color(hex: "A4A4A4"))
-                }
-            }
-            .frame(width: 230, height: 54)
-            .background(
-                RoundedRectangle(cornerRadius: 25, style: .continuous)
-                    .fill(canSubmit ? Theme.Palette.darkBrown : Color(hex: "F6F6F6"))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 25, style: .continuous)
-                    .stroke(canSubmit ? Color.clear : Color(hex: "A4A4A4"), lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-        .disabled(!canSubmit)
     }
 
     private func submit() {

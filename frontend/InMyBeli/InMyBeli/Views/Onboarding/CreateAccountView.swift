@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct CreateAccountView: View {
     let onComplete: (AuthSession) -> Void
@@ -7,6 +8,8 @@ struct CreateAccountView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var profileImageData: Data?
     @State private var isSubmitting = false
     @State private var errorMessage: String?
 
@@ -16,7 +19,6 @@ struct CreateAccountView: View {
         case name, username, password, confirm
     }
 
-    // One-off Figma colors not promoted to Theme.
     private let fieldFill = Color(hex: "EFEFEF")
     private let placeholderGray = Color(hex: "888888")
     private let photoPlaceholder = Color(hex: "D9D9D9")
@@ -47,17 +49,17 @@ struct CreateAccountView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.top, 30)
 
-                VStack(spacing: 75) {
+                VStack(spacing: 80) {
                     VStack(spacing: 60) {
                         photoBlock
                         inputsBlock
                     }
-                    .frame(width: 329)
+                    .padding(.horizontal, 24)
 
                     continueSection
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.top, 50)
+                .padding(.top, 48)
                 .padding(.bottom, 40)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -65,22 +67,35 @@ struct CreateAccountView: View {
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.Palette.background)
+        .onChange(of: selectedPhoto) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                    profileImageData = data
+                }
+            }
+        }
     }
 
     // MARK: - Photo
 
     private var photoBlock: some View {
         VStack(spacing: 20) {
-            Button {
-                // Profile picture upload not wired up in this UX pass.
-            } label: {
-                Circle()
-                    .fill(photoPlaceholder)
-                    .frame(width: 115, height: 115)
+            PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                if let profileImageData, let uiImage = UIImage(data: profileImageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 115, height: 115)
+                        .clipShape(Circle())
+                } else {
+                    Circle()
+                        .fill(photoPlaceholder)
+                        .frame(width: 115, height: 115)
+                }
             }
             .buttonStyle(.plain)
 
-            Text("Add Photo")
+            Text(profileImageData == nil ? "Add Photo" : "Change Photo")
                 .font(.system(size: 20, weight: .regular))
                 .foregroundColor(.black)
         }
@@ -170,7 +185,8 @@ struct CreateAccountView: View {
                 Text(message)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Theme.Palette.orangeBrown)
-                    .frame(width: 329, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
             }
 
             continueButton
@@ -195,7 +211,8 @@ struct CreateAccountView: View {
                 let session = try await AuthService.shared.createAccount(
                     name: trimmedName,
                     username: trimmedUsername,
-                    password: password
+                    password: password,
+                    profilePictureData: profileImageData
                 )
                 onComplete(session)
             } catch {
