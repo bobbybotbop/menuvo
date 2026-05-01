@@ -7,23 +7,32 @@ struct SearchBar: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 14, height: 14)
-                .foregroundColor(Theme.Palette.lightBrown)
+                .font(.system(size: 15, weight: .regular))
+                .foregroundColor(.secondary)
 
             TextField(placeholder, text: $text)
-                .font(.system(size: 15, weight: .regular))
+                .font(.system(size: 16, weight: .regular))
                 .foregroundColor(Theme.Palette.darkBrown)
                 .tint(Theme.Palette.lightBrown)
+                .textFieldStyle(.plain)
+                .autocorrectionDisabled()
+
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 15))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
         }
-        .frame(height: 38)
+        .padding(.vertical, 9)
         .padding(.horizontal, 12)
-        .background(Theme.Palette.cream)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.search))
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.Radius.search)
-                .stroke(Theme.Palette.lightBrown.opacity(0.18), lineWidth: 1)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(.systemGray6))
         )
     }
 }
