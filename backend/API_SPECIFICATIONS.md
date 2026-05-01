@@ -2,9 +2,20 @@
 
 ## Base URL
 
+Default local server:
+
 ```
-http://localhost:5000/api
+http://127.0.0.1:5000
 ```
+
+Blueprints are mounted as follows (full paths below each endpoint):
+
+| Area     | Prefix            |
+|----------|-------------------|
+| Users    | `/api/users`      |
+| Friends  | `/api/friends`    |
+| Cookbooks| `/api/cookbooks`  |
+| Recipes  | `/api`            |
 
 ## Authentication
 
@@ -16,10 +27,10 @@ Authorization: Bearer <session_token>
 
 Public endpoints (no auth required):
 
-- `POST /users/create/`
-- `POST /users/login/`
-- `POST /users/autologin/`
-- `GET /users/tokens`
+- `POST /api/users/create` or `POST /api/users/create/`
+- `POST /api/users/login/`
+- `POST /api/users/autologin/`
+- `GET /api/users/tokens`
 
 ---
 
@@ -27,30 +38,21 @@ Public endpoints (no auth required):
 
 ### 1. Create Account
 
-**Route:** `/users/create/`  
+**Route:** `POST /api/users/create` or `POST /api/users/create/`  
 **Method:** `POST`  
 **Authentication:** None (Public)  
-**Description:** Create a new user account
+**Description:** Create a new user account (multipart form-data; optional profile picture upload to S3)
 
-**Request Body:**
+**Request:** `multipart/form-data`
 
-```json
-{
-  "name": "string (required, 1-255 chars)",
-  "username": "string (required, 3-50 chars, must be unique)",
-  "password": "string (required, minimum 8 chars)"
-}
-```
+| Field             | Type   | Required |
+|-------------------|--------|----------|
+| `name`            | text   | Yes      |
+| `username`        | text   | Yes      |
+| `password`        | text   | Yes (min 8 chars) |
+| `profile_picture` | file   | No       |
 
-**Example Request:**
-
-```json
-{
-  "name": "John Doe",
-  "username": "johndoe",
-  "password": "securepass123"
-}
-```
+**Example (Postman / curl):** form fields `name`, `username`, `password`, optional file key `profile_picture`.
 
 **Example Response (201 Created):**
 
@@ -60,6 +62,7 @@ Public endpoints (no auth required):
     "id": 1,
     "name": "John Doe",
     "username": "johndoe",
+    "profile_url": "https://appdev-inmybeli.s3.us-east-2.amazonaws.com/assets/blankpfp.png",
     "created_at": "2026-04-29T10:30:00+00:00"
   },
   "session_token": "abc123def456..."
@@ -68,14 +71,15 @@ Public endpoints (no auth required):
 
 **Error Responses:**
 
-- `400 Bad Request` - Validation error (missing fields, invalid length)
+- `400 Bad Request` - Validation error (missing fields, invalid length); body may be Marshmallow field errors
 - `400 Bad Request` - Username already exists
+- `500 Internal Server Error` - Profile picture S3 upload failed (e.g. missing AWS credentials)
 
 ---
 
 ### 2. Login
 
-**Route:** `/users/login/`  
+**Route:** `POST /api/users/login/`  
 **Method:** `POST`  
 **Authentication:** None (Public)  
 **Description:** Login a user with username and password
@@ -107,6 +111,7 @@ Public endpoints (no auth required):
     "id": 1,
     "name": "John Doe",
     "username": "johndoe",
+    "profile_url": "https://example.com/pfp.jpg",
     "created_at": "2026-04-29T10:30:00+00:00"
   },
   "token": "xyz789abc123..."
@@ -122,7 +127,7 @@ Public endpoints (no auth required):
 
 ### 3. Auto Login
 
-**Route:** `/users/autologin/`  
+**Route:** `POST /api/users/autologin/`  
 **Method:** `POST`  
 **Authentication:** None (Public)  
 **Description:** Automatically login a user with a valid session token
@@ -152,6 +157,7 @@ Public endpoints (no auth required):
     "id": 1,
     "name": "John Doe",
     "username": "johndoe",
+    "profile_url": "https://example.com/pfp.jpg",
     "created_at": "2026-04-29T10:30:00+00:00"
   },
   "token": "abc123def456..."
@@ -168,7 +174,7 @@ Public endpoints (no auth required):
 
 ### 4. Get Current User
 
-**Route:** `/users/`  
+**Route:** `GET /api/users/`  
 **Method:** `GET`  
 **Authentication:** Required (Bearer token)  
 **Description:** Get information about the currently authenticated user
@@ -182,6 +188,7 @@ Public endpoints (no auth required):
   "id": 1,
   "name": "John Doe",
   "username": "johndoe",
+  "profile_url": "https://example.com/pfp.jpg",
   "created_at": "2026-04-29T10:30:00+00:00"
 }
 ```
@@ -194,7 +201,7 @@ Public endpoints (no auth required):
 
 ### 5. Get All Tokens
 
-**Route:** `/users/tokens`  
+**Route:** `GET /api/users/tokens`  
 **Method:** `GET`  
 **Authentication:** None (Public)  
 **Description:** Get all active session tokens (for debugging/testing only)
@@ -210,6 +217,7 @@ Public endpoints (no auth required):
       "id": 1,
       "token": "abc123def456...",
       "user_id": 1,
+      "expiresAt": "2026-04-30T10:30:00",
       "created_at": "2026-04-29T10:30:00+00:00"
     }
   ]
@@ -224,7 +232,7 @@ All friends endpoints require authentication.
 
 ### 1. Get Friends
 
-**Route:** `/users/friends/`  
+**Route:** `/api/friends/`  
 **Method:** `GET`  
 **Authentication:** Required  
 **Description:** Get all accepted friends for the current user
@@ -253,7 +261,7 @@ All friends endpoints require authentication.
 
 ### 2. Get Received Friend Requests
 
-**Route:** `/users/friends/pending/received/`  
+**Route:** `/api/friends/pending/received/`  
 **Method:** `GET`  
 **Authentication:** Required  
 **Description:** Get all received pending friend requests
@@ -279,7 +287,7 @@ All friends endpoints require authentication.
 
 ### 3. Get Sent Friend Requests
 
-**Route:** `/users/friends/pending/sent/`  
+**Route:** `/api/friends/pending/sent/`  
 **Method:** `GET`  
 **Authentication:** Required  
 **Description:** Get all sent pending friend requests
@@ -305,7 +313,7 @@ All friends endpoints require authentication.
 
 ### 4. Search Users
 
-**Route:** `/users/friends/search/<string:name>`  
+**Route:** `/api/friends/search/<string:name>`  
 **Method:** `GET`  
 **Authentication:** Required  
 **Description:** Search for users by username (case-insensitive, supports partial matches)
@@ -316,7 +324,7 @@ All friends endpoints require authentication.
 
 **Request Body:** None
 
-**Example Request:** `/users/friends/search/john`
+**Example Request:** `/api/friends/search/john`
 
 **Example Response (200 OK):**
 
@@ -327,12 +335,14 @@ All friends endpoints require authentication.
       "id": 1,
       "name": "John Doe",
       "username": "johndoe",
+      "profile_url": "https://example.com/pfp1.jpg",
       "created_at": "2026-04-29T10:30:00+00:00"
     },
     {
       "id": 6,
       "name": "Johnny Walker",
       "username": "johnnywalker",
+      "profile_url": "https://example.com/pfp2.jpg",
       "created_at": "2026-04-29T11:00:00+00:00"
     }
   ]
@@ -343,7 +353,7 @@ All friends endpoints require authentication.
 
 ### 5. Send Friend Request
 
-**Route:** `/users/friends/request/`  
+**Route:** `/api/friends/request/`  
 **Method:** `POST`  
 **Authentication:** Required  
 **Description:** Send a friend request to another user
@@ -383,7 +393,7 @@ All friends endpoints require authentication.
 
 ### 6. Accept Friend Request
 
-**Route:** `/users/friends/accept/`  
+**Route:** `/api/friends/accept/`  
 **Method:** `POST`  
 **Authentication:** Required  
 **Description:** Accept a pending friend request
@@ -423,7 +433,7 @@ All friends endpoints require authentication.
 
 ### 7. Decline Friend Request
 
-**Route:** `/users/friends/decline/`  
+**Route:** `/api/friends/decline/`  
 **Method:** `POST`  
 **Authentication:** Required  
 **Description:** Decline a pending friend request
@@ -463,7 +473,7 @@ All friends endpoints require authentication.
 
 ### 8. Remove Friend
 
-**Route:** `/users/friends/<int:friend_id>/`  
+**Route:** `/api/friends/<int:friend_id>/`  
 **Method:** `DELETE`  
 **Authentication:** Required  
 **Description:** Remove an accepted friend
@@ -474,7 +484,7 @@ All friends endpoints require authentication.
 
 **Request Body:** None
 
-**Example Request:** `/users/friends/2/`
+**Example Request:** `/api/friends/2/`
 
 **Example Response (200 OK):**
 
@@ -494,7 +504,7 @@ All friends endpoints require authentication.
 
 ### 9. Check Friendship Status
 
-**Route:** `/users/friends/<int:friend_id>/`  
+**Route:** `/api/friends/<int:friend_id>/`  
 **Method:** `GET`  
 **Authentication:** Required  
 **Description:** Check the relationship status between current user and another user
@@ -505,7 +515,7 @@ All friends endpoints require authentication.
 
 **Request Body:** None
 
-**Example Request:** `/users/friends/2/`
+**Example Request:** `/api/friends/2/`
 
 **Example Response (200 OK):**
 
@@ -532,7 +542,7 @@ All cookbook endpoints require authentication.
 
 ### 1. Get All Cookbooks
 
-**Route:** `/users/cookbooks/`  
+**Route:** `/api/cookbooks/`  
 **Method:** `GET`  
 **Authentication:** Required  
 **Description:** Get all cookbooks created by the current user
@@ -563,7 +573,7 @@ All cookbook endpoints require authentication.
 
 ### 2. Create Cookbook
 
-**Route:** `/users/cookbooks/`  
+**Route:** `/api/cookbooks/`  
 **Method:** `POST`  
 **Authentication:** Required  
 **Description:** Create a new cookbook
@@ -609,7 +619,7 @@ All cookbook endpoints require authentication.
 
 ### 3. Get Cookbook
 
-**Route:** `/users/cookbooks/<int:cookbook_id>/`  
+**Route:** `/api/cookbooks/<int:cookbook_id>/`  
 **Method:** `GET`  
 **Authentication:** Required  
 **Description:** Get a specific cookbook by ID with all recipes
@@ -620,7 +630,7 @@ All cookbook endpoints require authentication.
 
 **Request Body:** None
 
-**Example Request:** `/users/cookbooks/1/`
+**Example Request:** `/api/cookbooks/1/`
 
 **Example Response (200 OK):**
 
@@ -652,7 +662,7 @@ All cookbook endpoints require authentication.
 
 ### 4. Update Cookbook
 
-**Route:** `/users/cookbooks/<int:cookbook_id>/`  
+**Route:** `/api/cookbooks/<int:cookbook_id>/`  
 **Method:** `PUT`  
 **Authentication:** Required  
 **Description:** Update name and/or description of a cookbook (only creator can update)
@@ -703,7 +713,7 @@ All cookbook endpoints require authentication.
 
 ### 5. Delete Cookbook
 
-**Route:** `/users/cookbooks/<int:cookbook_id>/`  
+**Route:** `/api/cookbooks/<int:cookbook_id>/`  
 **Method:** `DELETE`  
 **Authentication:** Required  
 **Description:** Delete a cookbook (only creator can delete)
@@ -714,7 +724,7 @@ All cookbook endpoints require authentication.
 
 **Request Body:** None
 
-**Example Request:** `/users/cookbooks/1/`
+**Example Request:** `/api/cookbooks/1/`
 
 **Example Response (200 OK):**
 
@@ -733,7 +743,7 @@ All cookbook endpoints require authentication.
 
 ### 6. Add Recipe to Cookbook
 
-**Route:** `/users/cookbooks/<int:cookbook_id>/recipes/`  
+**Route:** `/api/cookbooks/<int:cookbook_id>/recipes/`  
 **Method:** `POST`  
 **Authentication:** Required  
 **Description:** Add a recipe to a cookbook
@@ -793,7 +803,7 @@ All cookbook endpoints require authentication.
 
 ### 7. Remove Recipe from Cookbook
 
-**Route:** `/users/cookbooks/<int:cookbook_id>/recipes/<int:recipe_id>/`  
+**Route:** `/api/cookbooks/<int:cookbook_id>/recipes/<int:recipe_id>/`  
 **Method:** `DELETE`  
 **Authentication:** Required  
 **Description:** Remove a recipe from a cookbook
@@ -805,7 +815,7 @@ All cookbook endpoints require authentication.
 
 **Request Body:** None
 
-**Example Request:** `/users/cookbooks/1/recipes/5/`
+**Example Request:** `/api/cookbooks/1/recipes/5/`
 
 **Example Response (200 OK):**
 
@@ -826,214 +836,90 @@ All cookbook endpoints require authentication.
 
 ## Recipes Endpoints
 
-All recipe endpoints require authentication.
+All recipe endpoints require authentication (`Authorization: Bearer <token>`).
 
 ### 1. Create Recipe
 
-**Route:** `/recipes/`  
+**Route:** `POST /api/recipes/`  
 **Method:** `POST`  
 **Authentication:** Required  
-**Description:** Create a new recipe owned by the current user
+**Description:** Create a new recipe for the current user. Uses **multipart/form-data** (same pattern as account creation). Optional file field `image` is uploaded to S3; `ingredients` / `instructions` may be sent as JSON strings so Marshmallow can parse them.
 
-**Request Body:**
+**Request:** `multipart/form-data`
 
-```json
-{
-  "title": "string (required, 1-255 chars)",
-  "description": "string (optional, max 2000 chars)",
-  "image_url": "string (optional, max 500 chars)",
-  "time_minutes": "integer (optional, 0-10000)",
-  "cuisine": "string (optional, max 100 chars)",
-  "servings": "integer (optional, 1-1000)",
-  "ingredients": "array of objects (optional)",
-  "instructions": "array of strings (optional)"
-}
-```
+| Field            | Type | Notes |
+|------------------|------|--------|
+| `title`          | text | Required |
+| `description`    | text | Optional |
+| `time_minutes`   | text | Optional integer string |
+| `cuisine`        | text | Optional |
+| `servings`       | text | Optional integer string |
+| `ingredients`    | text | Optional; JSON array of objects, e.g. `[{"name":"flour","amount":"2 cups"}]` |
+| `instructions` | text | Optional; JSON array of strings |
+| `image`          | file | Optional in schema; **recommended** — model stores `recipe_image_url` / `recipe_image_s3_key` |
 
-**Example Request:**
+**Example request (conceptual):** form fields + file `image`.
 
-```json
-{
-  "title": "Chocolate Chip Cookies",
-  "description": "Classic chocolate chip cookies",
-  "image_url": "https://example.com/cookies.jpg",
-  "time_minutes": 30,
-  "cuisine": "American",
-  "servings": 24,
-  "ingredients": [
-    { "name": "flour", "amount": "2 cups" },
-    { "name": "butter", "amount": "1 cup" }
-  ],
-  "instructions": [
-    "Preheat oven to 375F",
-    "Mix ingredients",
-    "Bake for 12 minutes"
-  ]
-}
-```
-
-**Example Response (201 Created):**
+**Example Response (201 Created):** `Recipe.serialize()` — full recipe
 
 ```json
 {
   "id": 1,
   "creator_id": 1,
   "title": "Chocolate Chip Cookies",
-  "description": "Classic chocolate chip cookies",
-  "image_url": "https://example.com/cookies.jpg",
+  "description": "Classic cookies",
+  "recipe_image_url": "https://your-bucket.s3.amazonaws.com/recipe/uuid.jpg",
   "time_minutes": 30,
   "cuisine": "American",
   "servings": 24,
-  "ingredients": [
-    { "name": "flour", "amount": "2 cups" },
-    { "name": "butter", "amount": "1 cup" }
-  ],
-  "instructions": [
-    "Preheat oven to 375F",
-    "Mix ingredients",
-    "Bake for 12 minutes"
-  ],
+  "ingredients": [{ "name": "flour", "amount": "2 cups" }],
+  "instructions": ["Preheat oven", "Mix", "Bake"],
   "created_at": "2026-04-29T10:30:00+00:00",
   "updated_at": "2026-04-29T10:30:00+00:00"
 }
 ```
 
-**Error Responses:**
-
-- `400 Bad Request` - Validation error (missing title)
+**Error Responses:** `400` validation; `500` S3 upload or DB error.
 
 ---
 
 ### 2. Get Recipe
 
-**Route:** `/recipes/<int:recipe_id>/`  
+**Route:** `GET /api/recipes/<recipe_id>/`  
 **Method:** `GET`  
 **Authentication:** Required  
-**Description:** Get a specific recipe by ID (full view with all details)
 
-**Path Parameters:**
+**Example Request:** `GET /api/recipes/1/`
 
-- `recipe_id` (integer) - ID of recipe to retrieve
+**Example Response (200 OK):** same shape as create response (full `Recipe.serialize()`).
 
-**Request Body:** None
-
-**Example Request:** `/recipes/1/`
-
-**Example Response (200 OK):**
-
-```json
-{
-  "id": 1,
-  "creator_id": 1,
-  "title": "Chocolate Chip Cookies",
-  "description": "Classic chocolate chip cookies",
-  "image_url": "https://example.com/cookies.jpg",
-  "time_minutes": 30,
-  "cuisine": "American",
-  "servings": 24,
-  "ingredients": [
-    { "name": "flour", "amount": "2 cups" },
-    { "name": "butter", "amount": "1 cup" }
-  ],
-  "instructions": [
-    "Preheat oven to 375F",
-    "Mix ingredients",
-    "Bake for 12 minutes"
-  ],
-  "created_at": "2026-04-29T10:30:00+00:00",
-  "updated_at": "2026-04-29T10:30:00+00:00"
-}
-```
-
-**Error Responses:**
-
-- `404 Not Found` - Recipe not found
+**Error Responses:** `404` recipe not found.
 
 ---
 
 ### 3. Update Recipe
 
-**Route:** `/recipes/<int:recipe_id>/`  
-**Method:** `PUT`  
+**Route:** `POST /api/recipes/<recipe_id>/`  
+**Method:** `POST` (not PUT)  
 **Authentication:** Required  
-**Description:** Update an existing recipe (only creator can update)
+**Description:** Update recipe; **only the creator** may update. Uses **multipart/form-data**. Include only fields you want to change. Optional file `image` replaces the image (new S3 upload under `recipes/` folder).
 
-**Path Parameters:**
+**Request:** `multipart/form-data` — any of: `title`, `description`, `time_minutes`, `cuisine`, `servings`, `ingredients` (JSON string), `instructions` (JSON string), file `image`.
 
-- `recipe_id` (integer) - ID of recipe to update
+**Example Response (200 OK):** full `Recipe.serialize()` as in create.
 
-**Request Body:**
-
-```json
-{
-  "title": "string (optional, 1-255 chars)",
-  "description": "string (optional, max 2000 chars)",
-  "image_url": "string (optional, max 500 chars)",
-  "time_minutes": "integer (optional, 0-10000)",
-  "cuisine": "string (optional, max 100 chars)",
-  "servings": "integer (optional, 1-1000)",
-  "ingredients": "array of objects (optional)",
-  "instructions": "array of strings (optional)"
-}
-```
-
-**Example Request:**
-
-```json
-{
-  "time_minutes": 25,
-  "servings": 32
-}
-```
-
-**Example Response (200 OK):**
-
-```json
-{
-  "id": 1,
-  "creator_id": 1,
-  "title": "Chocolate Chip Cookies",
-  "description": "Classic chocolate chip cookies",
-  "image_url": "https://example.com/cookies.jpg",
-  "time_minutes": 25,
-  "cuisine": "American",
-  "servings": 32,
-  "ingredients": [
-    { "name": "flour", "amount": "2 cups" },
-    { "name": "butter", "amount": "1 cup" }
-  ],
-  "instructions": [
-    "Preheat oven to 375F",
-    "Mix ingredients",
-    "Bake for 12 minutes"
-  ],
-  "created_at": "2026-04-29T10:30:00+00:00",
-  "updated_at": "2026-04-29T10:31:00+00:00"
-}
-```
-
-**Error Responses:**
-
-- `400 Bad Request` - Validation error
-- `403 Forbidden` - You do not own this recipe
-- `404 Not Found` - Recipe not found
+**Error Responses:** `400` validation; `403` not owner; `404` not found; `500` upload/DB.
 
 ---
 
 ### 4. Delete Recipe
 
-**Route:** `/recipes/<int:recipe_id>/`  
+**Route:** `DELETE /api/recipes/<recipe_id>/`  
 **Method:** `DELETE`  
 **Authentication:** Required  
-**Description:** Delete a recipe (only creator can delete)
+**Description:** Delete recipe (creator only).
 
-**Path Parameters:**
-
-- `recipe_id` (integer) - ID of recipe to delete
-
-**Request Body:** None
-
-**Example Request:** `/recipes/1/`
+**Example Request:** `DELETE /api/recipes/1/`
 
 **Example Response (200 OK):**
 
@@ -1044,27 +930,18 @@ All recipe endpoints require authentication.
 }
 ```
 
-**Error Responses:**
-
-- `403 Forbidden` - You do not own this recipe
-- `404 Not Found` - Recipe not found
+**Error Responses:** `403`, `404`.
 
 ---
 
 ### 5. Get Recipes by User
 
-**Route:** `/users/<int:user_id>/recipes/`  
+**Route:** `GET /api/users/<user_id>/recipes/`  
 **Method:** `GET`  
 **Authentication:** Required  
-**Description:** Get all recipes created by a specific user (returns previews, not full recipes)
+**Description:** List recipes by `creator_id` (preview cards).
 
-**Path Parameters:**
-
-- `user_id` (integer) - ID of user whose recipes to retrieve
-
-**Request Body:** None
-
-**Example Request:** `/users/1/recipes/`
+**Example Request:** `GET /api/users/1/recipes/`
 
 **Example Response (200 OK):**
 
@@ -1076,17 +953,9 @@ All recipe endpoints require authentication.
       "id": 1,
       "creator_id": 1,
       "title": "Chocolate Chip Cookies",
-      "image_url": "https://example.com/cookies.jpg",
+      "image_url": "https://your-bucket.s3.amazonaws.com/recipe/uuid.jpg",
       "time_minutes": 30,
       "cuisine": "American"
-    },
-    {
-      "id": 2,
-      "creator_id": 1,
-      "title": "Spaghetti Carbonara",
-      "image_url": "https://example.com/carbonara.jpg",
-      "time_minutes": 30,
-      "cuisine": "Italian"
     }
   ]
 }
@@ -1094,27 +963,43 @@ All recipe endpoints require authentication.
 
 ---
 
-### 6. Create or Update Review
+### 6. Get Recipe Feed (Discover)
 
-**Route:** `/recipes/<int:recipe_id>/reviews/`  
-**Method:** `POST`  
+**Route:** `GET /api/feed/recipes/`  
+**Method:** `GET`  
 **Authentication:** Required  
-**Description:** Create a new review or update an existing one for a recipe. A user can have at most one review per recipe — calling when one already exists updates the existing review.
+**Description:** All recipes for discover: ordered by calendar day (newest days first); within each day, friends’ recipes first. Each preview may include `total_saves_count` (distinct users who saved the recipe via a per-user cookbook named `"saved"`).
 
-**Path Parameters:**
+**Example Request:** `GET /api/feed/recipes/`
 
-- `recipe_id` (integer) - ID of recipe to review
-
-**Request Body:**
+**Example Response (200 OK):**
 
 ```json
 {
-  "rating": "integer (required, 1-5)",
-  "text": "string (optional, max 2000 chars)"
+  "recipes": [
+    {
+      "id": 1,
+      "creator_id": 2,
+      "title": "Pasta",
+      "image_url": "https://your-bucket.s3.amazonaws.com/recipe/uuid.jpg",
+      "time_minutes": 20,
+      "cuisine": "Italian",
+      "total_saves_count": 5
+    }
+  ]
 }
 ```
 
-**Example Request:**
+---
+
+### 7. Create or Update Review
+
+**Route:** `POST /api/recipes/<recipe_id>/reviews/`  
+**Method:** `POST`  
+**Authentication:** Required  
+**Content-Type:** `application/json`
+
+**Request body:**
 
 ```json
 {
@@ -1123,7 +1008,7 @@ All recipe endpoints require authentication.
 }
 ```
 
-**Example Response (201 Created) - New Review:**
+**Example Response (201)** new review / **(200)** updated review — `Review.serialize()`:
 
 ```json
 {
@@ -1137,42 +1022,17 @@ All recipe endpoints require authentication.
 }
 ```
 
-**Example Response (200 OK) - Updated Review:**
-
-```json
-{
-  "id": 1,
-  "user_id": 1,
-  "recipe_id": 1,
-  "rating": 4,
-  "text": "Pretty good, but a bit too sweet.",
-  "created_at": "2026-04-29T10:30:00+00:00",
-  "updated_at": "2026-04-29T10:35:00+00:00"
-}
-```
-
-**Error Responses:**
-
-- `400 Bad Request` - Validation error (invalid rating, missing required fields)
-- `404 Not Found` - Recipe not found
-- `409 Conflict` - Review already exists (use PUT to update instead)
+**Error Responses:** `400`, `404`, `409` — body: `{"error": "Review already exists; retry as an update"}` (race / concurrent create).
 
 ---
 
-### 7. Get Reviews for Recipe
+### 8. Get Reviews for Recipe
 
-**Route:** `/recipes/<int:recipe_id>/reviews/`  
+**Route:** `GET /api/recipes/<recipe_id>/reviews/`  
 **Method:** `GET`  
 **Authentication:** Required  
-**Description:** Get all reviews for a specific recipe, sorted by most recent first
 
-**Path Parameters:**
-
-- `recipe_id` (integer) - ID of recipe
-
-**Request Body:** None
-
-**Example Request:** `/recipes/1/reviews/`
+**Example Request:** `GET /api/recipes/1/reviews/`
 
 **Example Response (200 OK):**
 
@@ -1188,35 +1048,54 @@ All recipe endpoints require authentication.
       "text": "Love this recipe!",
       "created_at": "2026-04-29T11:00:00+00:00",
       "updated_at": "2026-04-29T11:00:00+00:00"
-    },
-    {
-      "id": 1,
-      "user_id": 1,
-      "recipe_id": 1,
-      "rating": 4,
-      "text": "Pretty good, but a bit too sweet.",
-      "created_at": "2026-04-29T10:30:00+00:00",
-      "updated_at": "2026-04-29T10:35:00+00:00"
     }
   ]
 }
 ```
 
-**Error Responses:**
+---
 
-- `404 Not Found` - Recipe not found
+### 9. Delete My Review
+
+**Route:** `DELETE /api/recipes/<recipe_id>/reviews/`  
+**Method:** `DELETE`  
+**Authentication:** Required  
+**Description:** Deletes the **current user’s** review for that recipe.
+
+**Example Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Review deleted"
+}
+```
+
+**Error Responses:** `404` if this user has no review for that recipe.
 
 ---
 
 ## Error Handling
 
-All error responses follow this format:
+Most errors from `error()` / `success()` helpers return JSON with an `error` key. The value is usually a **string**, but **Marshmallow validation** failures may pass a **nested object** (field names to message lists), for example:
 
 ```json
 {
-  "error": "Error message describing what went wrong"
+  "error": {
+    "username": ["Username is required"]
+  }
 }
 ```
+
+Simple string error:
+
+```json
+{
+  "error": "Recipe not found"
+}
+```
+
+The `@require_auth` decorator uses `jsonify` for missing/invalid tokens with the same `{"error": "..."}` shape and HTTP `401`.
 
 ### Common HTTP Status Codes
 
@@ -1238,3 +1117,5 @@ All error responses follow this format:
 - Session tokens are generated automatically and should be stored securely on the client
 - Users can only modify/delete their own resources (recipes, cookbooks)
 - Friendship relationships require mutual consent (pending → accepted)
+- `GET /api/cookbooks/<id>/` returns the cookbook if it exists (ownership is enforced on update/delete/add/remove recipe, not on this single GET in the current code).
+- Success responses are JSON bodies produced by `json.dumps`; set `Content-Type: application/json` on the client when sending JSON bodies.

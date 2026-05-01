@@ -157,9 +157,7 @@ def update_recipe(recipe_id):
     # Validate form data
     schema = UpdateRecipeSchema()
     expected_fields = ['title', 'description', 'instructions', 'time_minutes', 'cuisine', 'servings', 'ingredients', 'instructions']
-    print('h')
     raw_data = {field: request.form.get(field) for field in expected_fields if field in request.form}
-    print('s')
     try:
         # Pass only the form text to Marshmallow
         form_data = schema.load(raw_data)
@@ -184,7 +182,6 @@ def update_recipe(recipe_id):
             
         except Exception as e:
             return error(f"Upload error: {str(e)}", 500)
-    print('finished file upload')
     # Update recipe
     try:
         for field, value in form_data.items():
@@ -193,7 +190,6 @@ def update_recipe(recipe_id):
 
         db.session.commit()
         
-        print('trying to delete file')
         # Delete old image AFTER successful commit
         if new_s3_key and old_s3_key and old_s3_key != new_s3_key:
             delete_from_s3(old_s3_key)
