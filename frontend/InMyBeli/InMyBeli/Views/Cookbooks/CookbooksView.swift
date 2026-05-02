@@ -1,18 +1,10 @@
 import SwiftUI
 
-private let savedCookbookName = "saved"
-
 struct CookbooksView: View {
     @State private var cookbooks: [Cookbook] = []
-    @State private var savedCookbookId: Int?
-    @State private var savedRecipes: [RecipePreview] = []
     @State private var isLoading = false
     @State private var loadError: String?
     @State private var showCreateSheet = false
-
-    private var personalCookbooks: [Cookbook] {
-        cookbooks.filter { $0.name.lowercased() != savedCookbookName }
-    }
 
     var body: some View {
         NavigationStack {
@@ -76,10 +68,7 @@ struct CookbooksView: View {
                     .foregroundColor(Theme.Palette.lightBrown.opacity(0.8))
             }
         } else {
-            VStack(alignment: .leading, spacing: 48) {
-                myCookbooksSection
-                allSavedRecipesSection
-            }
+            myCookbooksSection
         }
     }
 
@@ -108,45 +97,15 @@ struct CookbooksView: View {
             }
 
             VStack(spacing: 20) {
-                if personalCookbooks.isEmpty {
+                if cookbooks.isEmpty {
                     Text("No cookbooks yet — tap + to create one.")
                         .font(.system(size: 14))
                         .foregroundColor(Theme.Palette.lightBrown.opacity(0.7))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
-                    ForEach(personalCookbooks) { cookbook in
+                    ForEach(cookbooks) { cookbook in
                         NavigationLink(value: cookbook) {
                             CookbookRow(cookbook: cookbook)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-        }
-    }
-
-    private var allSavedRecipesSection: some View {
-        VStack(alignment: .leading, spacing: 30) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("All Saved Recipes")
-                    .font(.system(size: 20, weight: .medium))
-                    .tracking(0.2)
-                    .foregroundColor(Theme.Palette.darkBrown)
-                Rectangle()
-                    .fill(Theme.Palette.darkBrown)
-                    .frame(height: 2)
-            }
-
-            VStack(spacing: 24) {
-                if savedRecipes.isEmpty {
-                    Text("No saved recipes yet.")
-                        .font(.system(size: 14))
-                        .foregroundColor(Theme.Palette.lightBrown.opacity(0.7))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                } else {
-                    ForEach(savedRecipes) { preview in
-                        NavigationLink(value: preview) {
-                            RecipeCard(preview: preview)
                         }
                         .buttonStyle(.plain)
                     }
@@ -160,16 +119,7 @@ struct CookbooksView: View {
         loadError = nil
         defer { isLoading = false }
         do {
-            let all = try await CookbookService.shared.fetchAll()
-            cookbooks = all
-            if let saved = all.first(where: { $0.name.lowercased() == savedCookbookName }) {
-                savedCookbookId = saved.id
-                let detail = try await CookbookService.shared.fetchDetail(id: saved.id)
-                savedRecipes = detail.recipes
-            } else {
-                savedCookbookId = nil
-                savedRecipes = []
-            }
+            cookbooks = try await CookbookService.shared.fetchAll()
         } catch {
             loadError = error.localizedDescription
         }
