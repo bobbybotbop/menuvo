@@ -1335,3 +1335,8 @@ curl -X GET http://localhost:5000/api/friends/2 \
 - `400 Bad Request` - Cannot check friendship with yourself
 - `401 Unauthorized` - Missing or invalid token
 - `404 Not Found` - Friend not found
+
+
+# NOTES
+
+Our backend supports the app's frontend, with several notable design considerations. Profile pictures and recipe images are uploaded directly to Amazon S3 with multipart/form-data requests using server-generated UUID filenames, and old images deleted on replacement. Authentication is handled by a require_auth decorator that validates bearer tokens on protected routes, attaches the resolved User to Flask's g context, and returns 401 on invalid or expired tokens; sessions live in a session_tokens table with a 24-hour default TTL and a unique constraint limiting each user to one active token. Marshmallow schemas validate request bodies before any DB writes, with pre_load hooks deserializing JSON-encoded ingredients and instructions from form data. The Friendship model enforces user_id < friend_id at both the app and DB level — guaranteeing one row per pair — alongside CHECK constraints preventing self-friendships and ensuring requester_id belongs to the pair. The /feed/recipes endpoint returns recipes grouped by day (newest first, friends prioritized) and annotates each with a total_saves_count and up to two friend_saved_profile_picture_urls for social proof, computed in a single query via func.count(func.distinct(...)). Finally, saves are modeled as a reserved per-user cookbook named "saved", letting the cookbook system double as a bookmark system without a separate saves table.
