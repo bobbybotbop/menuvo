@@ -11,5 +11,4 @@ ENV PYTHONPATH=/app
 
 EXPOSE 5001
 
-# Explicit factory so Flask CLI always finds the app (no discovery ambiguity)
 CMD ["python", "-m", "flask", "--app", "backend.app:create_app", "run", "--host", "0.0.0.0", "--port", "5001"]
