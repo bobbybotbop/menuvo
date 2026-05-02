@@ -7,6 +7,7 @@ struct CookbookDetailView: View {
     @State private var detail: CookbookDetail?
     @State private var isLoading = false
     @State private var loadError: String?
+    @State private var showAddRecipeSheet = false
 
     var body: some View {
         ScrollView {
@@ -31,6 +32,13 @@ struct CookbookDetailView: View {
         }
         .task { await load() }
         .refreshable { await load() }
+        .sheet(isPresented: $showAddRecipeSheet) {
+            AddRecipeToCookbookSheet(cookbook: cookbook) {
+                Task { await load() }
+            }
+            .presentationDetents([.height(469)])
+            .presentationDragIndicator(.hidden)
+        }
     }
 
     private var titleBlock: some View {
@@ -89,26 +97,31 @@ struct CookbookDetailView: View {
     }
 
     private var addRecipeButton: some View {
-        HStack(spacing: 5) {
-            Image(systemName: "plus")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Theme.Palette.cream)
-            Text("Add Recipe")
-                .font(.system(size: 15, weight: .regular))
-                .tracking(0.15)
-                .foregroundColor(Theme.Palette.cream)
+        Button {
+            showAddRecipeSheet = true
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "plus")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Theme.Palette.cream)
+                Text("Add Recipe")
+                    .font(.system(size: 15, weight: .regular))
+                    .tracking(0.15)
+                    .foregroundColor(Theme.Palette.cream)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Theme.Palette.darkBrown)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Theme.Palette.cream, lineWidth: 1)
+            )
+            .shadow(color: Color.white.opacity(0.4), radius: 8, x: 2, y: 4)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Theme.Palette.darkBrown)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Theme.Palette.cream, lineWidth: 1)
-        )
-        .shadow(color: Color.white.opacity(0.4), radius: 8, x: 2, y: 4)
+        .buttonStyle(.plain)
     }
 
     private func load() async {
