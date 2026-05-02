@@ -24,7 +24,7 @@ struct RecipeCard: View {
         VStack(alignment: .leading, spacing: 0) {
             heroImage
                 .frame(maxWidth: .infinity)
-                .frame(height: 170)
+                .frame(height: 168)
                 .clipped()
 
             VStack(alignment: .leading, spacing: 4) {
@@ -36,7 +36,7 @@ struct RecipeCard: View {
 
                 metaLine
             }
-            .padding(.horizontal, 14)
+            .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.white)

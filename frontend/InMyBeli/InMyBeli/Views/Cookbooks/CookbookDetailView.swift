@@ -10,21 +10,21 @@ struct CookbookDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 35) {
+            VStack(spacing: 32) {
                 titleBlock
 
                 recipesList
             }
-            .padding(.top, 28)
-            .padding(.horizontal, 27)
+            .padding(.top, 24)
+            .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }
         .background(Theme.Palette.background)
         .scrollIndicators(.hidden)
         .overlay(alignment: .bottomTrailing) {
             addRecipeButton
-                .padding(.trailing, 19)
-                .padding(.bottom, 26)
+                .padding(.trailing, 16)
+                .padding(.bottom, 24)
         }
         .toolbar {
             ToolbarItem(placement: .principal) { EmptyView() }
@@ -77,7 +77,7 @@ struct CookbookDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 20)
         } else if let recipes = detail?.recipes {
-            VStack(spacing: 26) {
+            VStack(spacing: 24) {
                 ForEach(recipes) { preview in
                     NavigationLink(value: preview) {
                         RecipeCard(preview: preview)

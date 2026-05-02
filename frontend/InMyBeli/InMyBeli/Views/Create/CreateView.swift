@@ -42,14 +42,14 @@ struct CreateView: View {
                     .tracking(0.25)
                     .foregroundColor(Theme.Palette.darkBrown)
             }
-            .padding(.leading, 20)
+            .padding(.leading, 24)
             .padding(.top, 20)
 
             Text("\(recipes.count) recipe\(recipes.count == 1 ? "" : "s")")
                 .font(.system(size: 15))
                 .tracking(0.15)
                 .foregroundColor(Theme.Palette.lightBrown)
-                .padding(.leading, 30)
+                .padding(.leading, 32)
                 .padding(.bottom, 8)
         }
     }
@@ -61,7 +61,7 @@ struct CreateView: View {
                     RecipeCard(preview: recipe)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             .padding(.top, 4)
             .padding(.bottom, 88)
         }
@@ -84,8 +84,8 @@ struct CreateView: View {
             .overlay(Capsule().stroke(Theme.Palette.cream.opacity(0.3), lineWidth: 1))
             .shadow(color: .white.opacity(0.5), radius: 5, x: 2, y: 4)
         }
-        .padding(.trailing, 20)
-        .padding(.bottom, 20)
+        .padding(.trailing, 24)
+        .padding(.bottom, 24)
     }
 
     private func loadRecipes() async {
