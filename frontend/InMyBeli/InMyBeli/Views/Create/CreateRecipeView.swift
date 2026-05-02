@@ -113,14 +113,14 @@ struct CreateRecipeView: View {
         HStack(spacing: 15) {
             if currentStep == 1 {
                 TextField("Recipe name", text: $title)
-                    .font(.system(size: 25, weight: .medium))
+                    .font(Theme.Typography.title)
                     .foregroundColor(Theme.Palette.darkBrown)
                     .focused($titleFocused)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
             } else {
                 Text(title.isEmpty ? "Recipe name" : title)
-                    .font(.system(size: 25, weight: .medium))
+                    .font(Theme.Typography.title)
                     .foregroundColor(title.isEmpty ? Theme.Palette.darkBrown.opacity(0.4) : Theme.Palette.darkBrown)
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
@@ -203,7 +203,7 @@ struct CreateRecipeView: View {
                     .font(.system(size: 72))
                     .foregroundColor(Theme.Palette.darkBrown)
                 Text("Ingredient List")
-                    .font(.system(size: 25, weight: .medium))
+                    .font(Theme.Typography.title)
                     .foregroundColor(Theme.Palette.darkBrown)
                     .padding(.leading, 13)
             }
@@ -251,7 +251,7 @@ struct CreateRecipeView: View {
                     .font(.system(size: 60))
                     .foregroundColor(Theme.Palette.darkBrown)
                 Text("Steps")
-                    .font(.system(size: 25, weight: .medium))
+                    .font(Theme.Typography.title)
                     .foregroundColor(Theme.Palette.darkBrown)
             }
 
@@ -393,9 +393,7 @@ struct AddIngredientSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Capsule()
-                .fill(Color(hex: "888888").opacity(0.3))
-                .frame(width: 96, height: 4)
+            SheetHandle(color: Color(hex: "888888").opacity(0.3))
                 .padding(.top, 10)
 
             VStack(alignment: .leading, spacing: 30) {
@@ -474,9 +472,7 @@ struct AddStepSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Capsule()
-                .fill(Color(hex: "888888").opacity(0.3))
-                .frame(width: 96, height: 4)
+            SheetHandle(color: Color(hex: "888888").opacity(0.3))
                 .padding(.top, 10)
 
             VStack(alignment: .leading, spacing: 30) {
