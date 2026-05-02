@@ -1,13 +1,7 @@
 import SwiftUI
 
-private enum ProfileSection: String, CaseIterable {
-    case reviews = "Reviews"
-    case requests = "Requests"
-}
-
 struct ProfileView: View {
     @EnvironmentObject var session: SessionStore
-    @State private var selectedSection: ProfileSection = .reviews
     @State private var recipes: [RecipePreview] = []
     @State private var reviews: [Review] = []
     @State private var reviewRecipes: [Int: Recipe] = [:]
@@ -21,10 +15,7 @@ struct ProfileView: View {
                 VStack(alignment: .leading, spacing: 32) {
                     profileHeader
 
-                    VStack(spacing: 24) {
-                        sectionPicker
-                        sectionContent
-                    }
+                    requestsContent
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 24)
@@ -109,90 +100,7 @@ struct ProfileView: View {
         }
     }
 
-    // MARK: - Section Picker
-
-    private var sectionPicker: some View {
-        HStack(spacing: 32) {
-            ForEach(ProfileSection.allCases, id: \.self) { section in
-                tabButton(for: section)
-            }
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    @ViewBuilder
-    private func tabButton(for section: ProfileSection) -> some View {
-        let isSelected = selectedSection == section
-        Button {
-            withAnimation(.easeInOut(duration: 0.18)) {
-                selectedSection = section
-            }
-        } label: {
-            VStack(spacing: 8) {
-                HStack(spacing: 6) {
-                    if section == .requests, friendRequests.count > 0 {
-                        requestBadge(count: friendRequests.count, isSelected: isSelected)
-                    }
-                    Text(section.rawValue)
-                        .font(.system(size: 15, weight: isSelected ? .medium : .light))
-                        .foregroundColor(.black)
-                }
-                Rectangle()
-                    .fill(isSelected ? Color.black : Color.clear)
-                    .frame(height: 1.5)
-                    .frame(maxWidth: .infinity)
-            }
-        }
-        .buttonStyle(.plain)
-        .fixedSize(horizontal: true, vertical: false)
-    }
-
-    private func requestBadge(count: Int, isSelected: Bool) -> some View {
-        Text("\(count)")
-            .font(.system(size: 13, weight: .medium))
-            .foregroundColor(isSelected ? Theme.Palette.orangeBrown : Theme.Palette.cream)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 2)
-            .background(
-                Capsule()
-                    .fill(isSelected ? Theme.Palette.cream : Theme.Palette.orangeBrown)
-            )
-            .overlay(
-                Capsule()
-                    .stroke(Theme.Palette.orangeBrown, lineWidth: isSelected ? 1 : 0)
-            )
-    }
-
     // MARK: - Section Content
-
-    @ViewBuilder
-    private var sectionContent: some View {
-        switch selectedSection {
-        case .reviews:
-            reviewsContent
-        case .requests:
-            requestsContent
-        }
-    }
-
-    @ViewBuilder
-    private var reviewsContent: some View {
-        if isLoading && reviews.isEmpty {
-            loadingView
-        } else if reviews.isEmpty {
-            emptyState(icon: "star", message: "No reviews yet.\nRate recipes you've tried!")
-        } else {
-            VStack(spacing: 16) {
-                ForEach(reviews) { review in
-                    ReviewCard(
-                        review: review,
-                        recipe: reviewRecipes[review.recipeId],
-                        userAvatarURL: session.currentUser?.profileURL
-                    )
-                }
-            }
-        }
-    }
 
     @ViewBuilder
     private var requestsContent: some View {
