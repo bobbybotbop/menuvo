@@ -7,7 +7,7 @@ struct APIError: Error, LocalizedError {
 final class APIClient {
     static let shared = APIClient()
 
-    var baseURL: URL = URL(string: "https://5571-128-84-126-121.ngrok-free.app/api/")!
+    var baseURL: URL = URL(string: "http://localhost:5001/api/")!
     var sessionToken: String?
 
     private let session: URLSession
