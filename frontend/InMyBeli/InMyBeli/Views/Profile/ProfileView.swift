@@ -1,14 +1,13 @@
 import SwiftUI
 
 private enum ProfileSection: String, CaseIterable {
-    case recipes = "Recipes"
-    case ratings = "Ratings"
-    case requests = "Friend Requests"
+    case reviews = "Reviews"
+    case requests = "Requests"
 }
 
 struct ProfileView: View {
     @EnvironmentObject var session: SessionStore
-    @State private var selectedSection: ProfileSection = .recipes
+    @State private var selectedSection: ProfileSection = .reviews
     @State private var recipes: [RecipePreview] = []
     @State private var friendRequests: [FriendRequest] = []
     @State private var friendCount = 0
@@ -17,25 +16,19 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 32) {
                     profileHeader
-                        .padding(.horizontal, 24)
-                        .padding(.top, 24)
-                        .padding(.bottom, 20)
 
-                    Rectangle()
-                        .fill(Theme.Palette.divider)
-                        .frame(height: 1)
-
-                    sectionPicker
-
-                    sectionContent
-                        .padding(.horizontal, 24)
-                        .padding(.top, 16)
-                        .padding(.bottom, 32)
+                    VStack(spacing: 24) {
+                        sectionPicker
+                        sectionContent
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 24)
+                .padding(.bottom, 32)
             }
-            .background(Theme.Palette.background)
+            .background(Color.white)
             .scrollIndicators(.hidden)
             .navigationDestination(for: RecipePreview.self) { preview in
                 RecipeDetailView(preview: preview)
@@ -48,87 +41,124 @@ struct ProfileView: View {
     // MARK: - Header
 
     private var profileHeader: some View {
-        HStack(alignment: .center, spacing: 20) {
-            Circle()
-                .fill(Theme.Palette.placeholder)
-                .frame(width: 100, height: 100)
-                .overlay(
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 48, weight: .light))
-                        .foregroundColor(Theme.Palette.lightBrown)
-                )
+        HStack(alignment: .center, spacing: 24) {
+            avatarView(urlString: session.currentUser?.profileURL, size: 100)
 
-            VStack(alignment: .leading, spacing: 4) {
-                if let user = session.currentUser {
-                    Text(user.name)
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(session.currentUser?.name ?? "—")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.black)
-                    Text("@\(user.username)")
-                        .font(.system(size: 15))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Theme.Palette.darkBrown)
+
+                    if let user = session.currentUser {
+                        Text("@\(user.username)")
+                            .font(.system(size: 15))
+                            .foregroundColor(Color(hex: "888888"))
+                    }
                 }
 
-                HStack(spacing: 24) {
-                    statView(count: recipes.count, label: "Recipes")
-                    statView(count: friendCount, label: "Friends")
+                HStack(spacing: 32) {
+                    statView(count: friendCount, label: "friends")
+                    statView(count: recipes.count, label: "recipes")
                 }
-                .padding(.top, 6)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
+        }
+    }
+
+    @ViewBuilder
+    private func avatarView(urlString: String?, size: CGFloat) -> some View {
+        let placeholder = Circle()
+            .fill(Theme.Palette.placeholder)
+            .frame(width: size, height: size)
+            .overlay(
+                Image(systemName: "person.fill")
+                    .font(.system(size: size * 0.44, weight: .light))
+                    .foregroundColor(Theme.Palette.lightBrown)
+            )
+
+        if let urlString, let url = URL(string: urlString) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: size, height: size)
+                        .clipShape(Circle())
+                default:
+                    placeholder
+                }
+            }
+        } else {
+            placeholder
         }
     }
 
     private func statView(count: Int, label: String) -> some View {
         VStack(spacing: 2) {
             Text("\(count)")
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 20, weight: .medium))
                 .foregroundColor(.black)
             Text(label)
-                .font(.system(size: 11))
-                .foregroundColor(.black)
+                .font(.system(size: 15))
+                .foregroundColor(Color(hex: "575757"))
         }
     }
 
     // MARK: - Section Picker
 
     private var sectionPicker: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 32) {
             ForEach(ProfileSection.allCases, id: \.self) { section in
-                Button {
-                    withAnimation(.easeInOut(duration: 0.18)) {
-                        selectedSection = section
-                    }
-                } label: {
-                    VStack(spacing: 8) {
-                        Text(section.rawValue)
-                            .font(.system(
-                                size: 13,
-                                weight: selectedSection == section ? .semibold : .regular
-                            ))
-                            .foregroundColor(
-                                selectedSection == section
-                                    ? .black
-                                    : Color.black.opacity(0.4)
-                            )
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-
-                        Rectangle()
-                            .fill(selectedSection == section ? Theme.Palette.darkBrown : Color.clear)
-                            .frame(height: 2)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 12)
-                }
-                .buttonStyle(.plain)
+                tabButton(for: section)
             }
         }
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(Theme.Palette.divider)
-                .frame(height: 1)
+        .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private func tabButton(for section: ProfileSection) -> some View {
+        let isSelected = selectedSection == section
+        Button {
+            withAnimation(.easeInOut(duration: 0.18)) {
+                selectedSection = section
+            }
+        } label: {
+            VStack(spacing: 8) {
+                HStack(spacing: 6) {
+                    if section == .requests, friendRequests.count > 0 {
+                        requestBadge(count: friendRequests.count, isSelected: isSelected)
+                    }
+                    Text(section.rawValue)
+                        .font(.system(size: 15, weight: isSelected ? .medium : .light))
+                        .foregroundColor(.black)
+                }
+                Rectangle()
+                    .fill(isSelected ? Color.black : Color.clear)
+                    .frame(height: 1.5)
+                    .frame(maxWidth: .infinity)
+            }
         }
+        .buttonStyle(.plain)
+        .fixedSize(horizontal: true, vertical: false)
+    }
+
+    private func requestBadge(count: Int, isSelected: Bool) -> some View {
+        Text("\(count)")
+            .font(.system(size: 13, weight: .medium))
+            .foregroundColor(isSelected ? Theme.Palette.orangeBrown : Theme.Palette.cream)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Theme.Palette.cream : Theme.Palette.orangeBrown)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(Theme.Palette.orangeBrown, lineWidth: isSelected ? 1 : 0)
+            )
     }
 
     // MARK: - Section Content
@@ -136,35 +166,16 @@ struct ProfileView: View {
     @ViewBuilder
     private var sectionContent: some View {
         switch selectedSection {
-        case .recipes:
-            recipesContent
-        case .ratings:
-            ratingsContent
+        case .reviews:
+            reviewsContent
         case .requests:
             requestsContent
         }
     }
 
     @ViewBuilder
-    private var recipesContent: some View {
-        if isLoading && recipes.isEmpty {
-            loadingView
-        } else if recipes.isEmpty {
-            emptyState(icon: "fork.knife", message: "No recipes yet.\nCreate your first recipe!")
-        } else {
-            VStack(spacing: 20) {
-                ForEach(recipes) { recipe in
-                    NavigationLink(value: recipe) {
-                        RecipeCard(preview: recipe)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
-    private var ratingsContent: some View {
-        emptyState(icon: "star", message: "No ratings yet.\nRate recipes you've tried!")
+    private var reviewsContent: some View {
+        emptyState(icon: "star", message: "No reviews yet.\nRate recipes you've tried!")
     }
 
     @ViewBuilder
@@ -174,7 +185,7 @@ struct ProfileView: View {
         } else if friendRequests.isEmpty {
             emptyState(icon: "person.2", message: "No pending friend requests.")
         } else {
-            VStack(spacing: 12) {
+            VStack(spacing: 16) {
                 ForEach(friendRequests) { request in
                     FriendRequestRow(request: request) {
                         await handleAccept(request)
@@ -190,7 +201,7 @@ struct ProfileView: View {
         ProgressView()
             .tint(Theme.Palette.lightBrown)
             .frame(maxWidth: .infinity)
-            .padding(.top, 60)
+            .padding(.top, 48)
     }
 
     private func emptyState(icon: String, message: String) -> some View {
@@ -204,7 +215,7 @@ struct ProfileView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 60)
+        .padding(.top, 48)
     }
 
     // MARK: - Actions
@@ -260,25 +271,26 @@ struct FriendRequestRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Circle()
-                .fill(Theme.Palette.cream)
-                .frame(width: 44, height: 44)
-                .overlay(Circle().stroke(Theme.Palette.lightBrown.opacity(0.2), lineWidth: 1))
+                .fill(Theme.Palette.placeholder)
+                .frame(width: 56, height: 56)
                 .overlay(
                     Text(initial)
-                        .font(.system(size: 17, weight: .medium))
+                        .font(.system(size: 20, weight: .medium))
                         .foregroundColor(Theme.Palette.lightBrown)
                 )
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(request.sender.name ?? request.sender.username)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.black)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Theme.Palette.darkBrown)
+                    .lineLimit(1)
                 Text("@\(request.sender.username)")
-                    .font(.system(size: 12))
-                    .foregroundColor(Color.black.opacity(0.5))
+                    .font(.system(size: 13))
+                    .foregroundColor(Color(hex: "888888"))
+                    .lineLimit(1)
             }
 
-            Spacer()
+            Spacer(minLength: 8)
 
             if isProcessing {
                 ProgressView()
@@ -289,48 +301,45 @@ struct FriendRequestRow: View {
                     Button {
                         isProcessing = true
                         Task {
-                            await onDecline()
+                            await onAccept()
                             isProcessing = false
                         }
                     } label: {
-                        Text("Decline")
+                        Text("Accept")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 7)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Theme.Palette.lightBrown.opacity(0.4), lineWidth: 1)
-                            )
+                            .foregroundColor(Theme.Palette.cream)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(Theme.Palette.darkBrown)
+                            .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
 
                     Button {
                         isProcessing = true
                         Task {
-                            await onAccept()
+                            await onDecline()
                             isProcessing = false
                         }
                     } label: {
-                        Text("Accept")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Theme.Palette.cream)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 7)
-                            .background(Theme.Palette.darkBrown)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        Text("Deny")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(hex: "A4A4A4"))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(Color(hex: "F6F6F6"))
+                            .overlay(
+                                Capsule().stroke(Color(hex: "A4A4A4"), lineWidth: 1)
+                            )
+                            .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
                 }
             }
         }
-        .padding(14)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
-                .stroke(Theme.Palette.darkBrown.opacity(0.08), lineWidth: 1)
-        )
-        .shadow(color: Theme.Palette.darkBrown.opacity(0.04), radius: 6, x: 0, y: 2)
+        .padding(16)
+        .background(Color(hex: "F6F6F6"))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(color: Color.black.opacity(0.08), radius: 12, x: 2, y: 4)
     }
 }

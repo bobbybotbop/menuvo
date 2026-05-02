@@ -26,9 +26,8 @@ struct SaveToCookbookSheet: View {
             .padding(.top, 10)
             .padding(.bottom, 30)
         }
-        .frame(maxWidth: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Theme.Palette.background)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .task { await load() }
         .sheet(isPresented: $showCreateSheet) {
             CreateCookbookView { _ in
