@@ -1,4 +1,5 @@
 from backend.models.base import db, DateTime, timedelta, get_utc_now
+from datetime import timezone
 
 class SessionToken(db.Model):
     """
@@ -37,4 +38,7 @@ class SessionToken(db.Model):
 
     def is_valid(self):
         """Check if the session token is still valid (not expired)."""
-        return get_utc_now() < self.expiresAt
+        expires = self.expiresAt
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        return get_utc_now() < expires
